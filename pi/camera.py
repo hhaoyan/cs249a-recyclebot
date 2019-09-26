@@ -6,13 +6,13 @@ from PIL import Image
 
 
 class CameraController(object):
-    def __init__(self, rotation=0, alpha=200):
+    def __init__(self, rotation=0, alpha=0):
         self.camera = PiCamera()
         self.camera.rotation = rotation
-        self.camera.start_preview(alpha=alpha)
+        #self.camera.start_preview(alpha=alpha)
 
     def close(self):
-        self.camera.stop_preview()
+        #self.camera.stop_preview()
         self.camera.close()
         self.camera = None
 
