@@ -25,36 +25,6 @@
 
 #include <stdlib.h>
 #include <zbar.h>
-#include "refcnt.h"
-
-typedef struct point_s {
-    int x, y;
-} point_t;
-
-struct zbar_symbol_set_s {
-    refcnt_t refcnt;
-    int nsyms;                  /* number of filtered symbols */
-    zbar_symbol_t *head;        /* first of decoded symbol results */
-    zbar_symbol_t *tail;        /* last of unfiltered symbol results */
-};
-
-struct zbar_symbol_s {
-    zbar_symbol_type_t type;    /* symbol type */
-    unsigned int data_alloc;    /* allocation size of data */
-    unsigned int datalen;       /* length of binary symbol data */
-    char *data;                 /* symbol data */
-
-    unsigned pts_alloc;         /* allocation size of pts */
-    unsigned npts;              /* number of points in location polygon */
-    point_t *pts;               /* list of points in location polygon */
-
-    refcnt_t refcnt;            /* reference count */
-    zbar_symbol_t *next;        /* linked list of results (or siblings) */
-    zbar_symbol_set_t *syms;    /* components of composite result */
-    unsigned long time;         /* relative symbol capture time */
-    int cache_count;            /* cache state */
-    int quality;                /* relative symbol reliability metric */
-};
 
 extern void _zbar_symbol_free(zbar_symbol_t*);
 
