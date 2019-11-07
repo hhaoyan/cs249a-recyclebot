@@ -1,3 +1,3 @@
 [submodule "buckler"]
 	path = buckler
-	url = git@github.com:lab11/buckler.git
+	url = https://github.com/lab11/buckler.git
