@@ -8,9 +8,11 @@ int main(void) {
 
   printf("Started\n");
 
-  pixy_get_resolution();
+  uint16_t width, height;
+  pixy_get_resolution(&width, &height);
   pixy_set_lamp(0, 0);
 
+  uint8_t* image = malloc(width * height * 3);
   while(1){
     pixy_block* blocks;
     int n_blocks = pixy_get_blocks(1, 0xff, &blocks);
@@ -26,7 +28,10 @@ int main(void) {
       }
       free(blocks);
     }
+    
+    // printf("Read image: %d pixels\n", 
+    //  pixy_get_image(&width, &height, image));
            
-    wait_ms(1000/30);
+    wait_ms(200);
   }
 }

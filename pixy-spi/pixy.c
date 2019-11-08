@@ -140,7 +140,7 @@ void pixy_get_version() {
   free(data);
 }
 
-void pixy_get_resolution() {
+void pixy_get_resolution(uint16_t* width, uint16_t* height) {
   uint8_t data = 0;
   pixy_packet_send(&data, 1, 0x0c, 0);
 
@@ -151,8 +151,9 @@ void pixy_get_resolution() {
     if(res_len != 4){
       printf("Error: recv packet size != 4 for resolution!\n");
     } else {
-      printf("Pixy2 resolution %dx%d\n",
-        *((uint16_t*)(res)), *((uint16_t*)(res+2)));
+      *width = *((uint16_t*)(res));
+      *height = *((uint16_t*)(res+2));
+      printf("Pixy2 resolution %dx%d\n", *width, *height);
     }
     free(res);
   } else {
@@ -203,4 +204,72 @@ int pixy_get_blocks(uint8_t sigmap, uint8_t max_blocks, pixy_block** blocks) {
   }
   
   return -1;
+}
+
+// Read packet without memory allocation, make sure buf is large enough!
+int _read_package_fast(uint8_t* buf, uint8_t* len, uint8_t* type) {
+  uint16_t sync = wait_for_sync();
+
+  if (sync == 0xc1ae) {
+    uint8_t header[2];
+    spi_recv(header, 2);
+
+    *type = header[0];
+    *len = header[1];
+    spi_recv(buf, *len);
+    
+    return 0;
+  } else if (sync == 0xc1af) {
+    // Need to perform checksum
+    uint8_t header[4];
+    spi_recv(header, 4);
+
+    *type = header[0];
+    *len = header[1];
+    spi_recv(buf, *len);
+
+    uint16_t checksum = 0;
+    for(int i=0;i<*len;i++) {
+      checksum += buf[i];
+    }
+
+    uint16_t* checksum_recv = (uint16_t*)(header+2);
+    if(checksum != *checksum_recv){
+      printf("Checksum mismatch, expected 0x%x, got 0x%x\n", 
+        *checksum_recv, checksum);
+      return 1;
+    }
+
+    return 0;
+  }
+
+  return 1;
+}
+
+int pixy_get_image(
+  uint16_t* width, uint16_t* height, 
+  uint8_t* rgb) {
+    uint8_t* buf = rgb;
+    uint8_t buf_cache[16];
+    uint8_t len, type;
+    
+    for(uint16_t i=0;i<*width;i++){
+      printf("%d row\n", i);
+      for(uint16_t j=0;j<*height;j++){
+        uint16_t data[3] = {i, j, 0};
+        // Don't saturate, but we use one more bytes here.
+        pixy_packet_send((uint8_t*)data, 5, 0x70, 0);
+        
+        if(_read_package_fast(buf_cache, &len, &type)){
+          return i*(*height) + j;
+        }
+        if(type != 0x1 || len != 4){
+          printf("Error: read image, packet type %d, length %d\n", 
+            type, len);
+          return i*(*height) + j;
+        }
+        memcpy(rgb, buf_cache, 3);
+      }
+    }
+    return (*height) * (*width);
 }
