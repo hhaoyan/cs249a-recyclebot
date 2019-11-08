@@ -1,7 +1,6 @@
 #include "state.h"
 #include "util.h"
 
-
 static KobukiSensors_t sensors = {0};
 static state_t state = Work;
 static float rotate = 0.0f;
@@ -42,9 +41,9 @@ static void rot() {
     rotate = normalize_rot(rotate + rot_now);
     state = Work;
   } else if (rot_diff > 0) {
-    kobukiDriveDirect(-300, 300);
+    kobukiDriveDirect(-150, 150);
   } else {
-    kobukiDriveDirect(300, -300);
+    kobukiDriveDirect(150, -150);
   }
 }
 
