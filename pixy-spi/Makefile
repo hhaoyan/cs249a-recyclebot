@@ -10,6 +10,7 @@ SOFTDEVICE_MODEL = s132
 APP_HEADER_PATHS += .
 APP_SOURCE_PATHS += .
 APP_SOURCES = $(notdir $(wildcard ./*.c)) $(notdir $(wildcard src-gen/*.c))
+APP_SOURCES := $(filter-out pi_spi.c,$(APP_SOURCES))
 
 BUCKLER_DIR = ../buckler/software/
 
