@@ -13,9 +13,21 @@ int main(void) {
   pixy_set_lamp(0, 0);
 
   uint8_t* image = malloc(width * height * 3);
+  FILE* file;
   while(1){
+    /*
     pixy_block* blocks;
     int n_blocks = pixy_get_blocks(1, 0xff, &blocks);
+    wait_ms(500);
+    n_blocks = pixy_get_blocks(1, 0xff, &blocks);
+    printf("Found %d blocks\n", n_blocks);
+    wait_ms(500);
+    n_blocks = pixy_get_blocks(1, 0xff, &blocks); 
+    printf("Found %d blocks\n", n_blocks);
+    
+    wait_ms(500);
+    n_blocks = pixy_get_blocks(1, 0xff, &blocks); 
+    printf("Found %d blocks\n", n_blocks);
     
     if(n_blocks >= 0){
       printf("Found %d blocks\n", n_blocks);
@@ -28,10 +40,14 @@ int main(void) {
       }
       free(blocks);
     }
-    
-    // printf("Read image: %d pixels\n", 
-    //  pixy_get_image(&width, &height, image));
-           
-    wait_ms(200);
+    */
+    printf("Start reading... \n");
+    printf("%d pixels\n", 
+      pixy_get_image(width, height, image));
+    printf("Found %d QR codes\n",
+      pixy_decode_qr(width, height, image));
+    pixy_write_image("image.bmp", width, height, image);
+
+    wait_ms(1000);
   }
 }

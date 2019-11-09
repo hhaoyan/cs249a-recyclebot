@@ -1,8 +1,11 @@
+#include <quirc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "pixy.h"
+
+struct quirc *qr = 0;
 
 void pixy_init() {
 	spi_init();
@@ -131,8 +134,12 @@ void pixy_get_version() {
     printf("Trying to get version...\n");
   }
 
-  if(len != 7) {
-    printf("Response size mismatch, trying to request version...\n");
+  if(len != 16) {
+    printf("Response size mismatch, expected %d got %d, data bytes:", 7, len);
+    for(int i=0;i<len;i++){
+      printf("0x%02x ", data[i]);
+    }
+    printf("\n");
   } else {
     printf("Pixy2 hardware version %d, firmware version %d:%d, build %d, firmware type \"%s\"\n",
       *((uint16_t*)(data)), *(data+2), *(data+3), *((uint16_t*)(data+4)), (char*)(data+6));
@@ -155,6 +162,7 @@ void pixy_get_resolution(uint16_t* width, uint16_t* height) {
       *height = *((uint16_t*)(res+2));
       printf("Pixy2 resolution %dx%d\n", *width, *height);
     }
+    
     free(res);
   } else {
     printf("Error: recv packet for resolution failed!\n");
@@ -246,30 +254,126 @@ int _read_package_fast(uint8_t* buf, uint8_t* len, uint8_t* type) {
   return 1;
 }
 
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
 int pixy_get_image(
-  uint16_t* width, uint16_t* height, 
+  uint16_t width, uint16_t height, 
   uint8_t* rgb) {
-    uint8_t* buf = rgb;
-    uint8_t buf_cache[16];
     uint8_t len, type;
     
-    for(uint16_t i=0;i<*width;i++){
-      printf("%d row\n", i);
-      for(uint16_t j=0;j<*height;j++){
-        uint16_t data[3] = {i, j, 0};
-        // Don't saturate, but we use one more bytes here.
-        pixy_packet_send((uint8_t*)data, 5, 0x70, 0);
+    uint8_t data[5];
+    uint32_t * start_addr = (uint32_t*) data;
+    uint8_t * req_len = (uint8_t*)(data+4);
+    uint32_t recvd = 0;
+    uint8_t * bayer_buffer = malloc(width*height);
+    
+    while(recvd < width * height){
+      *req_len = min(width * height - recvd, 249);
+      *start_addr = recvd;
+      //printf("req: %d->%d bytes, %d recvd\n", 
+      //  *start_addr, (*req_len) + (*start_addr), recvd);
+      
+      pixy_packet_send(data, 5, 0x75, 0);
+      
+      if(_read_package_fast(bayer_buffer+recvd, &len, &type)){
+          printf("Error: read image, early termination\n");
+          return recvd;
+      }
+      if(type != 0x76 || len != (*req_len)){
+        printf("Error: read image response, packet type %d, length %d\n", 
+          type, len);
+        return recvd;
+      }
+      
+      recvd += (*req_len);
+    }
+    
+    printf("Recvd %d bytes image\n", recvd);
+    
+    for(int i=0;i<height;i++){
+      for(int j=0;j<width;j++){
+        uint8_t r, g, b;
+        uint8_t* pixel = bayer_buffer + i*width + j;
+        if(i&1){
+          if(j&1){
+            r = *pixel;
+            g = (*(pixel-1) + *(pixel+1) + *(pixel+width) + *(pixel-width)) / 4;
+            b = (*(pixel-width-1) + *(pixel-width+1) + *(pixel+width-1) + *(pixel+width+1)) / 4;
+          } else {
+            r = (*(pixel-1) + *(pixel+1))/2;
+            g = *pixel;
+            b = (*(pixel-width) + *(pixel+width)) / 2;
+          }
+        } else {
+          if(j&1){
+            r = (*(pixel-width) + *(pixel+width))/2;
+            g = *pixel;
+            b = (*(pixel-1) + *(pixel+1)) / 2;
+          } else {
+            r = (*(pixel-width-1) + *(pixel-width+1) + *(pixel+width-1) + *(pixel+width+1)) / 4;
+            g = (*(pixel-1) + *(pixel+1) + *(pixel+width) + *(pixel-width)) / 4;
+            b = *pixel;
+          }
+        }
         
-        if(_read_package_fast(buf_cache, &len, &type)){
-          return i*(*height) + j;
-        }
-        if(type != 0x1 || len != 4){
-          printf("Error: read image, packet type %d, length %d\n", 
-            type, len);
-          return i*(*height) + j;
-        }
-        memcpy(rgb, buf_cache, 3);
+        rgb[(i*width + j)*3 + 0] = r;
+        rgb[(i*width + j)*3 + 1] = g;
+        rgb[(i*width + j)*3 + 2] = b;
       }
     }
-    return (*height) * (*width);
+    
+    free(bayer_buffer);
+    
+    return recvd;
+}
+
+extern int pixy_decode_qr(
+  uint16_t width, uint16_t height,
+  uint8_t* rgb) {
+  if(!qr){
+    qr = quirc_new();
+    if(!qr){
+      printf("Error: unable to allocate quirc!\n");
+      return -1;
+    }
+    
+    if (quirc_resize(qr, width, height) < 0) {
+      printf("Error: unable to resize quirc!\n");
+      return -1;
+    }
+  }
+  
+  uint8_t *image;
+  int w, h;
+  image = quirc_begin(qr, &w, &h);
+  for(int i=0;i<height;i++){
+    for(int j=0;j<width;j++){
+      uint8_t r = rgb[(i*width+j)*3+0],
+              g = rgb[(i*width+j)*3+1],
+              b = rgb[(i*width+j)*3+2];
+      uint8_t gray = (uint8_t)(r*2126/10000 + g*7152/10000 + b*722/10000);
+      image[i*width+j] = gray;
+    }
+  }
+  quirc_end(qr);
+  
+  int num_codes = quirc_count(qr);
+  for (int i = 0; i < num_codes; i++) {
+    struct quirc_code code;
+    struct quirc_data data;
+    quirc_decode_error_t err;
+
+    quirc_extract(qr, i, &code);
+
+    // Decoding stage
+    err = quirc_decode(&code, &data);
+    if (err)
+        printf("Error: QR decode failed: %s\n", quirc_strerror(err));
+    else
+        printf("Data: %s\n", data.payload);
+  }
+  
+  return num_codes;
 }

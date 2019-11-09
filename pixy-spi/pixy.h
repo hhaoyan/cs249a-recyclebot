@@ -39,7 +39,14 @@ extern int pixy_get_blocks(
   uint8_t sigmap, uint8_t max_blocks, pixy_block** blocks);
 // Get the raw image by RGB values, return number of pixels read.
 extern int pixy_get_image(
-  uint16_t* width, uint16_t* height, 
+  uint16_t width, uint16_t height, 
+  uint8_t* rgb);
+extern int pixy_write_image(
+  const char* filename,
+  uint16_t width, uint16_t height, 
+  uint8_t* rgb);
+extern int pixy_decode_qr(
+  uint16_t width, uint16_t height,
   uint8_t* rgb);
 
 #endif

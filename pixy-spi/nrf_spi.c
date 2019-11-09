@@ -38,3 +38,10 @@ void wait_us(int us) {
 void wait_ms(int ms) {
   nrf_delay_ms(ms);
 }
+
+int pixy_write_image(
+  const char* filename,
+  uint16_t* width, uint16_t* height, 
+  uint8_t* rgb) {
+  // do nothing
+}
