@@ -1,0 +1,65 @@
+SRC := \
+	main.c \
+	pi_spi.c \
+	pixy.c \
+	qrcode-zbar.c
+
+ZBAR_SRC := \
+	zbar/zbar/config.c \
+	zbar/zbar/img_scanner.c \
+	zbar/zbar/scanner.c \
+	zbar/zbar/decoder.c \
+	zbar/zbar/symbol.c \
+	zbar/zbar/image.c \
+	zbar/zbar/refcnt.c \
+	zbar/zbar/error.c \
+	zbar/zbar/decoder/qr_finder.c \
+	zbar/zbar/decoder/ean.c \
+	zbar/zbar/decoder/i25.c \
+	zbar/zbar/decoder/code39.c \
+	zbar/zbar/decoder/code128.c \
+	zbar/zbar/qrcode/qrdec.c \
+	zbar/zbar/qrcode/isaac.c \
+	zbar/zbar/qrcode/rs.c \
+	zbar/zbar/qrcode/bch15_5.c \
+	zbar/zbar/qrcode/binarize.c \
+	zbar/zbar/qrcode/qrdectxt.c \
+	zbar/zbar/qrcode/util.c
+
+LDFLAGS := -lm -lwiringPi
+CFLAGS := -g -Izbar/include -Izbar/zbar
+
+OBJS := $(SRC:%.c=_build/%.o)
+ZBAR_OBJS := $(subst qrcode/,,$(subst decoder/,, $(subst zbar/zbar/,,$(ZBAR_SRC:%.c=_build/%.o))))
+
+ALL_OBJS = $(OBJS) $(ZBAR_OBJS)
+
+all: _build spi
+
+_build:
+	@echo "Making _build dir"
+	@mkdir _build
+
+clean: 
+	@echo "Remove objects..."
+	@rm -rf $(ALL_OBJS) spi
+
+spi: $(ALL_OBJS)
+	@echo "Linking: $@"
+	@gcc $(LDFLAGS) $(ALL_OBJS) -o $@
+
+_build/%.o: %.c
+	@echo "Building file: $<"
+	@gcc $(CFLAGS) -c $< -o $@
+	
+_build/%.o: zbar/zbar/decoder/%.c
+	@echo "Building file: $<"
+	@gcc $(CFLAGS) -c $< -o $@
+	
+_build/%.o: zbar/zbar/qrcode/%.c
+	@echo "Building file: $<"
+	@gcc $(CFLAGS) -c $< -o $@
+
+_build/%.o: zbar/zbar/%.c
+	@echo "Building file: $<"
+	@gcc $(CFLAGS) -c $< -o $@
