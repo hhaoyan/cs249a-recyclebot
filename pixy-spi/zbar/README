@@ -1,3 +1,12 @@
+Note: this is a ZBAR source code ported specifically for running on
+nRF52832 microprocessor boards. The ZBAR is configured with:
+
+./configure --disable-video --disable-pthread --without-imagemagick \
+    --without-gtk --without-python --without-qt 
+
+The files in this folder have been kept as minimum, please refer to 
+the original ZBAR website for more details.
+
 ZBAR BAR CODE READER
 ====================
 
