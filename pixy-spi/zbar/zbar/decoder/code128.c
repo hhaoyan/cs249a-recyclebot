@@ -27,11 +27,6 @@
 #include <zbar.h>
 #include "decoder.h"
 
-#ifdef DEBUG_CODE128
-# define DEBUG_LEVEL (DEBUG_CODE128)
-#endif
-#include "debug.h"
-
 #define NUM_CHARS 108           /* total number of character codes */
 
 typedef enum code128_char_e {

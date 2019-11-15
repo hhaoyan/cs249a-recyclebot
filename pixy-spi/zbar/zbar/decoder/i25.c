@@ -27,11 +27,6 @@
 #include <zbar.h>
 #include "decoder.h"
 
-#ifdef DEBUG_I25
-# define DEBUG_LEVEL (DEBUG_I25)
-#endif
-#include "debug.h"
-
 static inline unsigned char i25_decode1 (unsigned char enc,
                                          unsigned e,
                                          unsigned s)

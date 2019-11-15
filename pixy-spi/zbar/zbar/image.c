@@ -21,9 +21,8 @@
  *  http://sourceforge.net/projects/zbar
  *------------------------------------------------------------------------*/
 
-#include "error.h"
+#include <string.h>
 #include "image.h"
-#include "refcnt.h"
 
 zbar_image_t *zbar_image_create ()
 {
@@ -108,18 +107,6 @@ inline void zbar_image_free_data (zbar_image_t *img)
 {
     if(!img)
         return;
-    if(img->src) {
-        /* replace video image w/new copy */
-        assert(img->refcnt); /* FIXME needs lock */
-        zbar_image_t *newimg = zbar_image_create();
-        memcpy(newimg, img, sizeof(zbar_image_t));
-        /* recycle video image */
-        newimg->cleanup(newimg);
-        /* detach old image from src */
-        img->cleanup = NULL;
-        img->src = NULL;
-        img->srcidx = -1;
-    }
     else if(img->cleanup && img->data) {
         if(img->cleanup != zbar_image_free_data) {
             /* using function address to detect this case is a bad idea;
@@ -197,106 +184,3 @@ typedef struct zimg_hdr_s {
     uint16_t width, height;
     uint32_t size;
 } zimg_hdr_t;
-
-int zbar_image_write (const zbar_image_t *img,
-                      const char *filebase)
-{
-    int len = strlen(filebase) + 16;
-    char filename[len];
-    strcpy(filename, filebase);
-    int n = 0;
-    if(*(char*)&img->format >= ' ')
-        n = snprintf(filename, len, "%s.%.4s.zimg",
-                     filebase, (char*)&img->format);
-    else
-        n = snprintf(filename, len, "%s.%08" PRIx32 ".zimg",
-                     filebase, img->format);
-    assert(n < len);
-    filename[len] = '\0';
-
-    zprintf(1, "dumping %.4s(%08" PRIx32 ") image to %s\n",
-            (char*)&img->format, img->format, filename);
-
-    FILE *f = fopen(filename, "w");
-    if(!f) {
-        int rc = errno;
-        zprintf(1, "ERROR opening %s: %s\n", filename, strerror(rc));
-        return(rc);
-    }
-
-    zimg_hdr_t hdr;
-    hdr.magic = 0x676d697a;
-    hdr.format = img->format;
-    hdr.width = img->width;
-    hdr.height = img->height;
-    hdr.size = img->datalen;
-
-    if(fwrite(&hdr, sizeof(hdr), 1, f) != 1 ||
-       fwrite(img->data, 1, img->datalen, f) != img->datalen) {
-        int rc = errno;
-        zprintf(1, "ERROR writing %s: %s\n", filename, strerror(rc));
-        fclose(f);
-        return(rc);
-    }
-    return(fclose(f));
-}
-
-#ifdef DEBUG_SVG
-# include <png.h>
-
-int zbar_image_write_png (const zbar_image_t *img,
-                          const char *filename)
-{
-    int rc = -1;
-    FILE *file = NULL;
-    png_struct *png = NULL;
-    png_info *info = NULL;
-    const uint8_t **rows = NULL;
-
-    rows = malloc(img->height * sizeof(*rows));
-    if(!rows)
-        goto done;
-
-    rows[0] = img->data;
-    int y;
-    for(y = 1; y < img->height; y++)
-        rows[y] = rows[y - 1] + img->width;
-
-    file = fopen(filename, "wb");
-    if(!file)
-        goto done;
-
-    png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if(!png)
-        goto done;
-
-    info = png_create_info_struct(png);
-    if(!info)
-        goto done;
-
-    if(setjmp(png_jmpbuf(png)))
-        goto done;
-
-    png_init_io(png, file);
-    png_set_compression_level(png, 9);
-    png_set_IHDR(png, info, img->width, img->height, 8, PNG_COLOR_TYPE_GRAY,
-                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-                 PNG_FILTER_TYPE_DEFAULT);
-
-    png_set_rows(png, info, (void*)rows);
-    png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);
-
-    png_write_end(png,info);
-    rc = 0;
-
-done:
-    if(png)
-        png_destroy_write_struct(&png, &info);
-    if(rows)
-        free(rows);
-    if(file)
-        fclose(file);
-    return(rc);
-}
-
-#endif
