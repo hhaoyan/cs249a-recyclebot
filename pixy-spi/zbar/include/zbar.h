@@ -65,14 +65,6 @@
  *   extracts barcodes from a stream of bar and space widths
  */
 
-#ifdef __cplusplus
-
-/** C++ namespace for library interfaces */
-namespace zbar {
-    extern "C" {
-#endif
-
-
 /** @name Global library interfaces */
 /*@{*/
 
@@ -193,12 +185,54 @@ extern zbar_error_t _zbar_get_error_code(const void *object);
 
 /*@}*/
 
+typedef int refcnt_t;
+
+#include <assert.h>
+
+static inline int _zbar_refcnt (refcnt_t *cnt,
+                                int delta)
+{
+    int rc = (*cnt += delta);
+    assert(rc >= 0);
+    return(rc);
+}
+
+
+static void _zbar_refcnt_init(void){}
+
+typedef struct point_s {
+    int x, y;
+} point_t;
+
 struct zbar_symbol_s;
+struct zbar_symbol_set_s;
+
+struct zbar_symbol_s {
+    zbar_symbol_type_t type;    /* symbol type */
+    unsigned int data_alloc;    /* allocation size of data */
+    unsigned int datalen;       /* length of binary symbol data */
+    char *data;                 /* symbol data */
+
+    unsigned pts_alloc;         /* allocation size of pts */
+    unsigned npts;              /* number of points in location polygon */
+    point_t *pts;               /* list of points in location polygon */
+
+    refcnt_t refcnt;            /* reference count */
+    struct zbar_symbol_s *next;        /* linked list of results (or siblings) */
+    struct zbar_symbol_set_s *syms;    /* components of composite result */
+    unsigned long time;         /* relative symbol capture time */
+    int cache_count;            /* cache state */
+    int quality;                /* relative symbol reliability metric */
+};
+
 typedef struct zbar_symbol_s zbar_symbol_t;
 
-struct zbar_symbol_set_s;
-typedef struct zbar_symbol_set_s zbar_symbol_set_t;
-
+typedef struct zbar_symbol_set_s {
+    refcnt_t refcnt;
+    int nsyms;                  /* number of filtered symbols */
+    zbar_symbol_t *head;        /* first of decoded symbol results */
+    zbar_symbol_t *tail;        /* last of unfiltered symbol results */
+} zbar_symbol_set_t;
 
 /*------------------------------------------------------------*/
 /** @name Symbol interface
@@ -571,434 +605,6 @@ extern zbar_image_t *zbar_image_read(char *filename);
 /*@}*/
 
 /*------------------------------------------------------------*/
-/** @name Processor interface
- * @anchor c-processor
- * high-level self-contained image processor.
- * processes video and images for barcodes, optionally displaying
- * images to a library owned output window
- */
-/*@{*/
-
-struct zbar_processor_s;
-/** opaque standalone processor object. */
-typedef struct zbar_processor_s zbar_processor_t;
-
-/** constructor.
- * if threaded is set and threading is available the processor
- * will spawn threads where appropriate to avoid blocking and
- * improve responsiveness
- */
-extern zbar_processor_t *zbar_processor_create(int threaded);
-
-/** destructor.  cleans up all resources associated with the processor
- */
-extern void zbar_processor_destroy(zbar_processor_t *processor);
-
-/** (re)initialization.
- * opens a video input device and/or prepares to display output
- */
-extern int zbar_processor_init(zbar_processor_t *processor,
-                               const char *video_device,
-                               int enable_display);
-
-/** request a preferred size for the video image from the device.
- * the request may be adjusted or completely ignored by the driver.
- * @note must be called before zbar_processor_init()
- * @since 0.6
- */
-extern int zbar_processor_request_size(zbar_processor_t *processor,
-                                       unsigned width,
-                                       unsigned height);
-
-/** request a preferred video driver interface version for
- * debug/testing.
- * @note must be called before zbar_processor_init()
- * @since 0.6
- */
-extern int zbar_processor_request_interface(zbar_processor_t *processor,
-                                            int version);
-
-/** request a preferred video I/O mode for debug/testing.  You will
- * get errors if the driver does not support the specified mode.
- * @verbatim
-    0 = auto-detect
-    1 = force I/O using read()
-    2 = force memory mapped I/O using mmap()
-    3 = force USERPTR I/O (v4l2 only)
-@endverbatim
- * @note must be called before zbar_processor_init()
- * @since 0.7
- */
-extern int zbar_processor_request_iomode(zbar_processor_t *video,
-                                         int iomode);
-
-/** force specific input and output formats for debug/testing.
- * @note must be called before zbar_processor_init()
- */
-extern int zbar_processor_force_format(zbar_processor_t *processor,
-                                       unsigned long input_format,
-                                       unsigned long output_format);
-
-/** setup result handler callback.
- * the specified function will be called by the processor whenever
- * new results are available from the video stream or a static image.
- * pass a NULL value to disable callbacks.
- * @param processor the object on which to set the handler.
- * @param handler the function to call when new results are available.
- * @param userdata is set as with zbar_processor_set_userdata().
- * @returns the previously registered handler
- */
-extern zbar_image_data_handler_t*
-zbar_processor_set_data_handler(zbar_processor_t *processor,
-                                zbar_image_data_handler_t *handler,
-                                const void *userdata);
-
-/** associate user specified data value with the processor.
- * @since 0.6
- */
-extern void zbar_processor_set_userdata(zbar_processor_t *processor,
-                                        void *userdata);
-
-/** return user specified data value associated with the processor.
- * @since 0.6
- */
-extern void *zbar_processor_get_userdata(const zbar_processor_t *processor);
-
-/** set config for indicated symbology (0 for all) to specified value.
- * @returns 0 for success, non-0 for failure (config does not apply to
- * specified symbology, or value out of range)
- * @see zbar_decoder_set_config()
- * @since 0.4
- */
-extern int zbar_processor_set_config(zbar_processor_t *processor,
-                                     zbar_symbol_type_t symbology,
-                                     zbar_config_t config,
-                                     int value);
-
-/** parse configuration string using zbar_parse_config()
- * and apply to processor using zbar_processor_set_config().
- * @returns 0 for success, non-0 for failure
- * @see zbar_parse_config()
- * @see zbar_processor_set_config()
- * @since 0.4
- */
-static inline int zbar_processor_parse_config (zbar_processor_t *processor,
-                                               const char *config_string)
-{
-    zbar_symbol_type_t sym;
-    zbar_config_t cfg;
-    int val;
-    return(zbar_parse_config(config_string, &sym, &cfg, &val) ||
-           zbar_processor_set_config(processor, sym, cfg, val));
-}
-
-/** retrieve the current state of the ouput window.
- * @returns 1 if the output window is currently displayed, 0 if not.
- * @returns -1 if an error occurs
- */
-extern int zbar_processor_is_visible(zbar_processor_t *processor);
-
-/** show or hide the display window owned by the library.
- * the size will be adjusted to the input size
- */
-extern int zbar_processor_set_visible(zbar_processor_t *processor,
-                                      int visible);
-
-/** control the processor in free running video mode.
- * only works if video input is initialized. if threading is in use,
- * scanning will occur in the background, otherwise this is only
- * useful wrapping calls to zbar_processor_user_wait(). if the
- * library output window is visible, video display will be enabled.
- */
-extern int zbar_processor_set_active(zbar_processor_t *processor,
-                                     int active);
-
-/** retrieve decode results for last scanned image/frame.
- * @returns the symbol set result container or NULL if no results are
- * available
- * @note the returned symbol set has its reference count incremented;
- * ensure that the count is decremented after use
- * @since 0.10
- */
-extern const zbar_symbol_set_t*
-zbar_processor_get_results(const zbar_processor_t *processor);
-
-/** wait for input to the display window from the user
- * (via mouse or keyboard).
- * @returns >0 when input is received, 0 if timeout ms expired
- * with no input or -1 in case of an error
- */
-extern int zbar_processor_user_wait(zbar_processor_t *processor,
-                                    int timeout);
-
-/** process from the video stream until a result is available,
- * or the timeout (in milliseconds) expires.
- * specify a timeout of -1 to scan indefinitely
- * (zbar_processor_set_active() may still be used to abort the scan
- * from another thread).
- * if the library window is visible, video display will be enabled.
- * @note that multiple results may still be returned (despite the
- * name).
- * @returns >0 if symbols were successfully decoded,
- * 0 if no symbols were found (ie, the timeout expired)
- * or -1 if an error occurs
- */
-extern int zbar_process_one(zbar_processor_t *processor,
-                            int timeout);
-
-/** process the provided image for barcodes.
- * if the library window is visible, the image will be displayed.
- * @returns >0 if symbols were successfully decoded,
- * 0 if no symbols were found or -1 if an error occurs
- */
-extern int zbar_process_image(zbar_processor_t *processor,
-                              zbar_image_t *image);
-
-/** display detail for last processor error to stderr.
- * @returns a non-zero value suitable for passing to exit()
- */
-static inline int
-zbar_processor_error_spew (const zbar_processor_t *processor,
-                           int verbosity)
-{
-    return(_zbar_error_spew(processor, verbosity));
-}
-
-/** retrieve the detail string for the last processor error. */
-static inline const char*
-zbar_processor_error_string (const zbar_processor_t *processor,
-                             int verbosity)
-{
-    return(_zbar_error_string(processor, verbosity));
-}
-
-/** retrieve the type code for the last processor error. */
-static inline zbar_error_t
-zbar_processor_get_error_code (const zbar_processor_t *processor)
-{
-    return(_zbar_get_error_code(processor));
-}
-
-/*@}*/
-
-/*------------------------------------------------------------*/
-/** @name Video interface
- * @anchor c-video
- * mid-level video source abstraction.
- * captures images from a video device
- */
-/*@{*/
-
-struct zbar_video_s;
-/** opaque video object. */
-typedef struct zbar_video_s zbar_video_t;
-
-/** constructor. */
-extern zbar_video_t *zbar_video_create(void);
-
-/** destructor. */
-extern void zbar_video_destroy(zbar_video_t *video);
-
-/** open and probe a video device.
- * the device specified by platform specific unique name
- * (v4l device node path in *nix eg "/dev/video",
- *  DirectShow DevicePath property in windows).
- * @returns 0 if successful or -1 if an error occurs
- */
-extern int zbar_video_open(zbar_video_t *video,
-                           const char *device);
-
-/** retrieve file descriptor associated with open *nix video device
- * useful for using select()/poll() to tell when new images are
- * available (NB v4l2 only!!).
- * @returns the file descriptor or -1 if the video device is not open
- * or the driver only supports v4l1
- */
-extern int zbar_video_get_fd(const zbar_video_t *video);
-
-/** request a preferred size for the video image from the device.
- * the request may be adjusted or completely ignored by the driver.
- * @returns 0 if successful or -1 if the video device is already
- * initialized
- * @since 0.6
- */
-extern int zbar_video_request_size(zbar_video_t *video,
-                                   unsigned width,
-                                   unsigned height);
-
-/** request a preferred driver interface version for debug/testing.
- * @note must be called before zbar_video_open()
- * @since 0.6
- */
-extern int zbar_video_request_interface(zbar_video_t *video,
-                                        int version);
-
-/** request a preferred I/O mode for debug/testing.  You will get
- * errors if the driver does not support the specified mode.
- * @verbatim
-    0 = auto-detect
-    1 = force I/O using read()
-    2 = force memory mapped I/O using mmap()
-    3 = force USERPTR I/O (v4l2 only)
-@endverbatim
- * @note must be called before zbar_video_open()
- * @since 0.7
- */
-extern int zbar_video_request_iomode(zbar_video_t *video,
-                                     int iomode);
-
-/** retrieve current output image width.
- * @returns the width or 0 if the video device is not open
- */
-extern int zbar_video_get_width(const zbar_video_t *video);
-
-/** retrieve current output image height.
- * @returns the height or 0 if the video device is not open
- */
-extern int zbar_video_get_height(const zbar_video_t *video);
-
-/** initialize video using a specific format for debug.
- * use zbar_negotiate_format() to automatically select and initialize
- * the best available format
- */
-extern int zbar_video_init(zbar_video_t *video,
-                           unsigned long format);
-
-/** start/stop video capture.
- * all buffered images are retired when capture is disabled.
- * @returns 0 if successful or -1 if an error occurs
- */
-extern int zbar_video_enable(zbar_video_t *video,
-                             int enable);
-
-/** retrieve next captured image.  blocks until an image is available.
- * @returns NULL if video is not enabled or an error occurs
- */
-extern zbar_image_t *zbar_video_next_image(zbar_video_t *video);
-
-/** display detail for last video error to stderr.
- * @returns a non-zero value suitable for passing to exit()
- */
-static inline int zbar_video_error_spew (const zbar_video_t *video,
-                                         int verbosity)
-{
-    return(_zbar_error_spew(video, verbosity));
-}
-
-/** retrieve the detail string for the last video error. */
-static inline const char *zbar_video_error_string (const zbar_video_t *video,
-                                                   int verbosity)
-{
-    return(_zbar_error_string(video, verbosity));
-}
-
-/** retrieve the type code for the last video error. */
-static inline zbar_error_t
-zbar_video_get_error_code (const zbar_video_t *video)
-{
-    return(_zbar_get_error_code(video));
-}
-
-/*@}*/
-
-/*------------------------------------------------------------*/
-/** @name Window interface
- * @anchor c-window
- * mid-level output window abstraction.
- * displays images to user-specified platform specific output window
- */
-/*@{*/
-
-struct zbar_window_s;
-/** opaque window object. */
-typedef struct zbar_window_s zbar_window_t;
-
-/** constructor. */
-extern zbar_window_t *zbar_window_create(void);
-
-/** destructor. */
-extern void zbar_window_destroy(zbar_window_t *window);
-
-/** associate reader with an existing platform window.
- * This can be any "Drawable" for X Windows or a "HWND" for windows.
- * input images will be scaled into the output window.
- * pass NULL to detach from the resource, further input will be
- * ignored
- */
-extern int zbar_window_attach(zbar_window_t *window,
-                              void *x11_display_w32_hwnd,
-                              unsigned long x11_drawable);
-
-/** control content level of the reader overlay.
- * the overlay displays graphical data for informational or debug
- * purposes.  higher values increase the level of annotation (possibly
- * decreasing performance). @verbatim
-    0 = disable overlay
-    1 = outline decoded symbols (default)
-    2 = also track and display input frame rate
-@endverbatim
- */
-extern void zbar_window_set_overlay(zbar_window_t *window,
-                                    int level);
-
-/** retrieve current content level of reader overlay.
- * @see zbar_window_set_overlay()
- * @since 0.10
- */
-extern int zbar_window_get_overlay(const zbar_window_t *window);
-
-/** draw a new image into the output window. */
-extern int zbar_window_draw(zbar_window_t *window,
-                            zbar_image_t *image);
-
-/** redraw the last image (exposure handler). */
-extern int zbar_window_redraw(zbar_window_t *window);
-
-/** resize the image window (reconfigure handler).
- * this does @em not update the contents of the window
- * @since 0.3, changed in 0.4 to not redraw window
- */
-extern int zbar_window_resize(zbar_window_t *window,
-                              unsigned width,
-                              unsigned height);
-
-/** display detail for last window error to stderr.
- * @returns a non-zero value suitable for passing to exit()
- */
-static inline int zbar_window_error_spew (const zbar_window_t *window,
-                                          int verbosity)
-{
-    return(_zbar_error_spew(window, verbosity));
-}
-
-/** retrieve the detail string for the last window error. */
-static inline const char*
-zbar_window_error_string (const zbar_window_t *window,
-                          int verbosity)
-{
-    return(_zbar_error_string(window, verbosity));
-}
-
-/** retrieve the type code for the last window error. */
-static inline zbar_error_t
-zbar_window_get_error_code (const zbar_window_t *window)
-{
-    return(_zbar_get_error_code(window));
-}
-
-
-/** select a compatible format between video input and output window.
- * the selection algorithm attempts to use a format shared by
- * video input and window output which is also most useful for
- * barcode scanning.  if a format conversion is necessary, it will
- * heuristically attempt to minimize the cost of the conversion
- */
-extern int zbar_negotiate_format(zbar_video_t *video,
-                                 zbar_window_t *window);
-
-/*@}*/
-
-/*------------------------------------------------------------*/
 /** @name Image Scanner interface
  * @anchor c-imagescanner
  * mid-level image scanner interface.
@@ -1294,19 +900,8 @@ extern zbar_color_t zbar_scanner_get_color(const zbar_scanner_t *scanner);
 
 /*@}*/
 
-#ifdef __cplusplus
-    }
-}
-
-# include "zbar/Exception.h"
-# include "zbar/Decoder.h"
-# include "zbar/Scanner.h"
-# include "zbar/Symbol.h"
-# include "zbar/Image.h"
-# include "zbar/ImageScanner.h"
-# include "zbar/Video.h"
-# include "zbar/Window.h"
-# include "zbar/Processor.h"
-#endif
+# define dprintf(...)
+# define zassert(...)
+# define zprintf(...)
 
 #endif

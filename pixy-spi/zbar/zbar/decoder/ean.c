@@ -25,11 +25,6 @@
 #include <zbar.h>
 #include "decoder.h"
 
-#ifdef DEBUG_EAN
-# define DEBUG_LEVEL (DEBUG_EAN)
-#endif
-#include "debug.h"
-
 /* partial decode symbol location */
 typedef enum symbol_partial_e {
     EAN_LEFT   = 0x0000,

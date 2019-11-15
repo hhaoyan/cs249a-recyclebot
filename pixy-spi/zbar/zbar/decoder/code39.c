@@ -27,11 +27,6 @@
 #include <zbar.h>
 #include "decoder.h"
 
-#ifdef DEBUG_CODE39
-# define DEBUG_LEVEL (DEBUG_CODE39)
-#endif
-#include "debug.h"
-
 #define NUM_CHARS (0x2c)
 
 static const unsigned char code39_hi[32] = {
