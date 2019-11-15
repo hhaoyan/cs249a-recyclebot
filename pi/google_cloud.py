@@ -1,10 +1,9 @@
 from google.cloud import vision
 import io
+from camera import CameraController
 
-def get_labels(file_path):
+def get_labels(content):
     client = vision.ImageAnnotatorClient()
-    with io.open(file_path, 'rb') as image_file:
-        content = image_file.read()
 
     image = vision.types.Image(content=content)
 
@@ -139,20 +138,21 @@ def get_classification(fine_grain_labels):
         classification = 'recycling'
     elif count_compost > count_trash and count_compost > count_recycling:
         classification = 'composting'
-    elif count_trash >= count_recycling and count_trash >= count_compost:
+    elif count_trash > count_recycling and count_trash > count_compost:
         classification = 'trash'
     else:
         classification = 'unknown'
     return classification
 
-
-
-
-location = '/Users/btl787/Google Drive/00-fa19/03-eecs-249a-embedded-systems/project/apple.jpg'
+# location = '/Users/btl787/Google Drive/00-fa19/03-eecs-249a-embedded-systems/project/apple.jpg'
 # location = '/home/pi/Desktop/crumpled_napkin.jpg'
 
-google_cloud_labels = get_labels(location)
-fine_grain_labels = get_fine_grain_labels(google_cloud_labels)
-classification =  get_classification(fine_grain_labels)
-print('labels:', google_cloud_labels)
-print('classification:', classification)
+if __name__ == '__main__':
+    cam = CameraController()
+    content = cam.take_picture()
+    google_cloud_labels = get_labels(content)
+    fine_grain_labels = get_fine_grain_labels(google_cloud_labels)
+    classification =  get_classification(fine_grain_labels)
+    print('labels:', google_cloud_labels)
+    print('classification:', classification)
+
