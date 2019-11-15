@@ -53,22 +53,6 @@
 #define EWMA_WEIGHT ((unsigned)((ZBAR_SCANNER_EWMA_WEIGHT              \
                                  * (1 << (ZBAR_FIXED + 1)) + 1) / 2))
 
-/* scanner state */
-struct zbar_scanner_s {
-    zbar_decoder_t *decoder; /* associated bar width decoder */
-    unsigned y1_min_thresh; /* minimum threshold */
-
-    unsigned x;             /* relative scan position of next sample */
-    int y0[4];              /* short circular buffer of average intensities */
-
-    int y1_sign;            /* slope at last crossing */
-    unsigned y1_thresh;     /* current slope threshold */
-
-    unsigned cur_edge;      /* interpolated position of tracking edge */
-    unsigned last_edge;     /* interpolated position of last located edge */
-    unsigned width;         /* last element width */
-};
-
 zbar_scanner_t *zbar_scanner_create (zbar_decoder_t *dcode)
 {
     zbar_scanner_t *scn = malloc(sizeof(zbar_scanner_t));
@@ -85,7 +69,7 @@ void zbar_scanner_destroy (zbar_scanner_t *scn)
 
 zbar_symbol_type_t zbar_scanner_reset (zbar_scanner_t *scn)
 {
-    memset(&scn->x, 0, sizeof(zbar_scanner_t) + (void*)scn - (void*)&scn->x);
+    memset(&scn->x, 0, sizeof(zbar_scanner_t) + (unsigned int)scn - (unsigned int)&scn->x);
     scn->y1_thresh = scn->y1_min_thresh;
     if(scn->decoder)
         zbar_decoder_reset(scn->decoder);
@@ -193,7 +177,7 @@ zbar_symbol_type_t zbar_scanner_new_scan (zbar_scanner_t *scn)
     }
 
     /* reset scanner and associated decoder */
-    memset(&scn->x, 0, sizeof(zbar_scanner_t) + (void*)scn - (void*)&scn->x);
+    memset(&scn->x, 0, sizeof(zbar_scanner_t) + (unsigned int)scn - (unsigned int)&scn->x);
     scn->y1_thresh = scn->y1_min_thresh;
     if(scn->decoder)
         zbar_decoder_new_scan(scn->decoder);

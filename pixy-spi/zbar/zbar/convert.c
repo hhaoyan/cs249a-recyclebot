@@ -21,9 +21,9 @@
  *  http://sourceforge.net/projects/zbar
  *------------------------------------------------------------------------*/
 
+#include <string.h>
+#include <stdio.h>
 #include "image.h"
-#include "video.h"
-#include "window.h"
 
 /* pack bit size and location offset of a component into one byte
  */
@@ -371,9 +371,9 @@ static void convert_uvp_append (zbar_image_t *dst,
             dst->width, dst->height, n, dst->datalen,
             src->width, src->height, src->datalen);
     dst->data = malloc(dst->datalen);
-    if(!dst->data) return;
+    if(!(dst->data)) return;
     convert_y_resize(dst, dstfmt, src, srcfmt, n);
-    memset((void*)dst->data + n, 0x80, dst->datalen - n);
+    memset((uint8_t*)(dst->data) + n, 0x80, dst->datalen - n);
 }
 
 /* interleave YUV planes into packed YUV */
@@ -392,13 +392,13 @@ static void convert_yuv_pack (zbar_image_t *dst,
     unsigned long srcn = src->width * src->height;
     assert(src->datalen >= srcn + 2 * srcn);
     uint8_t flags = dstfmt->p.yuv.packorder ^ srcfmt->p.yuv.packorder;
-    uint8_t *srcy = (void*)src->data;
+    uint8_t *srcy = (uint8_t*)(src->data);
     const uint8_t *srcu, *srcv;
     if(flags & 1) {
-        srcv = src->data + srcn;
+        srcv = (uint8_t*)src->data + srcn;
         srcu = srcv + srcm;
     } else {
-        srcu = src->data + srcn;
+        srcu = (uint8_t*)src->data + srcn;
         srcv = srcu + srcm;
     }
     flags = dstfmt->p.yuv.packorder & 2;
@@ -453,9 +453,9 @@ static void convert_yuv_unpack (zbar_image_t *dst,
     unsigned long dstm2 = uvp_size(dst, dstfmt) * 2;
     dst->datalen = dstn + dstm2;
     dst->data = malloc(dst->datalen);
-    if(!dst->data) return;
+    if(!(dst->data)) return;
     if(dstm2)
-        memset((void*)dst->data + dstn, 0x80, dstm2);
+        memset((uint8_t*)dst->data + dstn, 0x80, dstm2);
     uint8_t *dsty = (void*)dst->data;
 
     uint8_t flags = srcfmt->p.yuv.packorder ^ dstfmt->p.yuv.packorder;
@@ -496,10 +496,10 @@ static void convert_uvp_resample (zbar_image_t *dst,
     unsigned long dstm2 = uvp_size(dst, dstfmt) * 2;
     dst->datalen = dstn + dstm2;
     dst->data = malloc(dst->datalen);
-    if(!dst->data) return;
+    if(!(dst->data)) return;
     convert_y_resize(dst, dstfmt, src, srcfmt, dstn);
     if(dstm2)
-        memset((void*)dst->data + dstn, 0x80, dstm2);
+        memset((uint8_t*)dst->data + dstn, 0x80, dstm2);
 }
 
 /* rearrange interleaved UV componets */
@@ -613,7 +613,7 @@ static void convert_rgb_to_yuvp (zbar_image_t *dst,
     dst->data = malloc(dst->datalen);
     if(!dst->data) return;
     if(dstm2)
-        memset((void*)dst->data + dstn, 0x80, dstm2);
+        memset((uint8_t*)dst->data + dstn, 0x80, dstm2);
     uint8_t *dsty = (void*)dst->data;
 
     assert(src->datalen >= (src->width * src->height * srcfmt->p.rgb.bpp));
@@ -1014,115 +1014,4 @@ static inline int has_format (uint32_t fmt,
         if(*fmts == fmt)
             return(1);
     return(0);
-}
-
-/* select least cost conversion from src format to available dsts */
-int _zbar_best_format (uint32_t src,
-                       uint32_t *dst,
-                       const uint32_t *dsts)
-{
-    if(dst)
-        *dst = 0;
-    if(!dsts)
-        return(-1);
-    if(has_format(src, dsts)) {
-        zprintf(8, "shared format: %4.4s\n", (char*)&src);
-        if(dst)
-            *dst = src;
-        return(0);
-    }
-    const zbar_format_def_t *srcfmt = _zbar_format_lookup(src);
-    if(!srcfmt)
-        return(-1);
-
-    zprintf(8, "from %.4s(%08" PRIx32 ") to", (char*)&src, src);
-    unsigned min_cost = -1;
-    for(; *dsts; dsts++) {
-        const zbar_format_def_t *dstfmt = _zbar_format_lookup(*dsts);
-        if(!dstfmt)
-            continue;
-        int cost;
-        if(srcfmt->group == dstfmt->group &&
-           srcfmt->p.cmp == dstfmt->p.cmp)
-            cost = 0;
-        else
-            cost = conversions[srcfmt->group][dstfmt->group].cost;
-
-        if(_zbar_verbosity >= 8)
-            fprintf(stderr, " %.4s(%08" PRIx32 ")=%d",
-                    (char*)dsts, *dsts, cost);
-        if(cost >= 0 && min_cost > cost) {
-            min_cost = cost;
-            if(dst)
-                *dst = *dsts;
-        }
-    }
-    if(_zbar_verbosity >= 8)
-        fprintf(stderr, "\n");
-    return(min_cost);
-}
-
-int zbar_negotiate_format (zbar_video_t *vdo,
-                           zbar_window_t *win)
-{
-    if(!vdo && !win)
-        return(0);
-
-    if(win)
-        (void)window_lock(win);
-
-    errinfo_t *errdst = (vdo) ? &vdo->err : &win->err;
-    if(verify_format_sort()) {
-        if(win)
-            (void)window_unlock(win);
-        return(err_capture(errdst, SEV_FATAL, ZBAR_ERR_INTERNAL, __func__,
-                           "image format list is not sorted!?"));
-    }
-
-    if((vdo && !vdo->formats) || (win && !win->formats)) {
-        if(win)
-            (void)window_unlock(win);
-        return(err_capture(errdst, SEV_ERROR, ZBAR_ERR_UNSUPPORTED, __func__,
-                           "no input or output formats available"));
-    }
-
-    static const uint32_t y800[2] = { fourcc('Y','8','0','0'), 0 };
-    const uint32_t *srcs = (vdo) ? vdo->formats : y800;
-    const uint32_t *dsts = (win) ? win->formats : y800;
-
-    unsigned min_cost = -1;
-    uint32_t min_fmt = 0;
-    const uint32_t *fmt;
-    for(fmt = _zbar_formats; *fmt; fmt++) {
-        /* only consider formats supported by video device */
-        if(!has_format(*fmt, srcs))
-            continue;
-        uint32_t win_fmt = 0;
-        int cost = _zbar_best_format(*fmt, &win_fmt, dsts);
-        if(cost < 0) {
-            zprintf(4, "%.4s(%08" PRIx32 ") -> ? (unsupported)\n",
-                    (char*)fmt, *fmt);
-            continue;
-        }
-        zprintf(4, "%.4s(%08" PRIx32 ") -> %.4s(%08" PRIx32 ") (%d)\n",
-                (char*)fmt, *fmt, (char*)&win_fmt, win_fmt, cost);
-        if(min_cost > cost) {
-            min_cost = cost;
-            min_fmt = *fmt;
-            if(!cost)
-                break;
-        }
-    }
-    if(win)
-        (void)window_unlock(win);
-
-    if(!min_fmt)
-        return(err_capture(errdst, SEV_ERROR, ZBAR_ERR_UNSUPPORTED, __func__,
-                           "no supported image formats available"));
-    if(!vdo)
-        return(0);
-
-    zprintf(2, "setting best format %.4s(%08" PRIx32 ") (%d)\n",
-            (char*)&min_fmt, min_fmt, min_cost);
-    return(zbar_video_init(vdo, min_fmt));
 }

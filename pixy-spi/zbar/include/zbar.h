@@ -829,9 +829,21 @@ extern void *zbar_decoder_get_userdata(const zbar_decoder_t *decoder);
  */
 /*@{*/
 
-struct zbar_scanner_s;
-/** opaque scanner object. */
-typedef struct zbar_scanner_s zbar_scanner_t;
+/* scanner state */
+typedef struct zbar_scanner_s {
+    zbar_decoder_t *decoder; /* associated bar width decoder */
+    unsigned y1_min_thresh; /* minimum threshold */
+
+    unsigned x;             /* relative scan position of next sample */
+    int y0[4];              /* short circular buffer of average intensities */
+
+    int y1_sign;            /* slope at last crossing */
+    unsigned y1_thresh;     /* current slope threshold */
+
+    unsigned cur_edge;      /* interpolated position of tracking edge */
+    unsigned last_edge;     /* interpolated position of last located edge */
+    unsigned width;         /* last element width */
+} zbar_scanner_t;
 
 /** constructor.
  * if decoder is non-NULL it will be attached to scanner
