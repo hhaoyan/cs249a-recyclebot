@@ -27,6 +27,23 @@ typedef struct pixy_block {
   uint8_t age;
 } pixy_block;
 
+typedef enum {
+  LINE_FEA_VECTOR = 0x1,
+  LINE_FEA_INTERSECTION = 0x2,
+  LINE_FEA_BARCODE = 0x4,
+} line_feature_type;
+
+typedef enum {
+  LINE_FEA_REQ_MAIN = 0x0,
+  LINE_FEA_REQ_ALL = 0x1,
+} line_feature_req;
+
+typedef struct line_feature {
+  line_feature_type type;
+  uint8_t len;
+  uint8_t *data;
+} line_feature;
+
 // Pixy helper functions
 // Connect with Pixy and print version information.
 extern void pixy_get_version();
@@ -37,6 +54,9 @@ extern void pixy_set_lamp(int upper, int lower);
 // Get blocks recognized by Pixy cam, return number of blocks or -1 on error.
 extern int pixy_get_blocks(
   uint8_t sigmap, uint8_t max_blocks, pixy_block** blocks);
+// Get line features, return number of features or -1 on error.
+extern int pixy_get_line_features(
+  line_feature_req req_group, line_feature_req req_type, line_feature** features);
 // Get the raw image by RGB values, return number of pixels read.
 extern int pixy_get_image(
   uint16_t width, uint16_t height, 
