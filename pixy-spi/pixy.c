@@ -368,3 +368,43 @@ int pixy_get_image(
     
     return recvd;
 }
+
+int pixy_get_barcodes(barcode** codes) {
+  pixy_packet_send(NULL, 0, 0x77, 0);
+
+  uint8_t* res = 0;
+  uint8_t res_len = 0;
+  uint8_t res_type = 0;
+  if(!pixy_packet_recv(&res, &res_len, &res_type)){
+    if(res_type == 0x78){
+
+      uint8_t n_codes = 0;
+      for(int i=0;i<res_len;){
+        n_codes += 1;
+        i += (2+res[i+1]);
+      }
+      *codes = malloc(sizeof(barcode)*n_codes);
+
+      uint8_t *pt = res;
+      for(int i=0;i<n_codes;i++){
+        (*codes + i)->type = pt[0];
+        (*codes + i)->len = pt[1];
+        (*codes + i)->data = malloc(pt[1]);
+        memcpy((*codes + i)->data, pt+2, pt[1]);
+        pt += 2 + pt[1];
+      }
+      free(res);
+      return n_codes;
+    } else if (res_type == 0x3) {
+      printf("Error: cannot get barcodes, error code: %d\n", res[0]);
+    } else {
+      printf("Error: cannot get barcodes, response: %d\n", res_type);
+    }
+    
+    free(res);
+  } else {
+    printf("Error: recv packet for obtaining barcodes failed!\n");
+  }
+  
+  return -1;
+}

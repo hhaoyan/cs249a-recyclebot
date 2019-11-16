@@ -44,6 +44,20 @@ typedef struct line_feature {
   uint8_t *data;
 } line_feature;
 
+typedef enum {
+  BARCODE_EAN8 = 8,
+  BARCODE_I25 = 25,
+  BARCODE_CODE39 = 39,
+  BARCODE_QRCODE = 64,
+  BAERCODE_CODE128 = 128,
+} barcode_type;
+
+typedef struct barcode {
+  barcode_type type;
+  uint8_t len;
+  uint8_t *data;
+} barcode;
+
 // Pixy helper functions
 // Connect with Pixy and print version information.
 extern void pixy_get_version();
@@ -57,6 +71,8 @@ extern int pixy_get_blocks(
 // Get line features, return number of features or -1 on error.
 extern int pixy_get_line_features(
   line_feature_req req_group, line_feature_req req_type, line_feature** features);
+// Get bar codes, return number of barcodes or -1 on error.
+extern int pixy_get_barcodes(barcode** codes);
 // Get the raw image by RGB values, return number of pixels read.
 extern int pixy_get_image(
   uint16_t width, uint16_t height, 

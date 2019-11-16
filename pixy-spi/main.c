@@ -13,7 +13,9 @@ int main(void) {
   pixy_set_lamp(1, 0);
 
   line_feature* features;
+  barcode* barcodes;
   while(1){
+    /*
     printf("*******Request line features*******\n");
 
     int n_features = pixy_get_line_features(
@@ -56,6 +58,23 @@ int main(void) {
       free(features);
     }else if(n_features==0){
       printf("No line features\n");
+    }else{
+      printf("Read from Pixy error!\n");
+    }*/
+    
+    printf("*******Request bar codes*******\n");
+
+    int n_codes = pixy_get_barcodes(&barcodes);
+
+    if(n_codes > 0){
+      for(int i=0;i<n_codes;i++){
+        printf("Code type %d, length %d, data: %s\n", 
+          barcodes[i].type, barcodes[i].len, barcodes[i].data);
+        free(barcodes[i].data);
+      }
+      free(barcodes);
+    }else if(n_codes==0){
+      printf("No barcodes\n");
     }else{
       printf("Read from Pixy error!\n");
     }
