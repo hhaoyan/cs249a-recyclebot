@@ -41,7 +41,8 @@ void wait_ms(int ms) {
 
 int pixy_write_image(
   const char* filename,
-  uint16_t* width, uint16_t* height, 
+  uint16_t width, uint16_t height, 
   uint8_t* rgb) {
   // do nothing
+  return 0;
 }

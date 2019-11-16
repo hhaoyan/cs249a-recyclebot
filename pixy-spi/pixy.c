@@ -212,6 +212,48 @@ int pixy_get_blocks(uint8_t sigmap, uint8_t max_blocks, pixy_block** blocks) {
   return -1;
 }
 
+int pixy_get_line_features(
+  line_feature_req req_group, line_feature_req req_type, line_feature** features) {
+  uint8_t data[2] = {req_group, req_type};
+  pixy_packet_send(data, 2, 0x30, 0);
+
+  uint8_t* res = 0;
+  uint8_t res_len = 0;
+  uint8_t res_type = 0;
+  if(!pixy_packet_recv(&res, &res_len, &res_type)){
+    if(res_type == 0x31){
+
+      uint8_t n_features = 0;
+      for(int i=0;i<res_len;){
+        n_features += 1;
+        i += (2+res[i+1]);
+      }
+      *features = malloc(sizeof(line_feature)*n_features);
+
+      uint8_t *pt = res;
+      for(int i=0;i<n_features;i++){
+        (*features + i)->type = pt[0];
+        (*features + i)->len = pt[1];
+        (*features + i)->data = malloc(pt[1]);
+        memcpy((*features + i)->data, pt+2, pt[1]);
+        pt += 2 + pt[1];
+      }
+      free(res);
+      return n_features;
+    } else if (res_type == 0x3) {
+      printf("Error: cannot get line features, error code: %d\n", res[0]);
+    } else {
+      printf("Error: cannot get line features, response: %d\n", res_type);
+    }
+    
+    free(res);
+  } else {
+    printf("Error: recv packet for obtaining line features failed!\n");
+  }
+  
+  return -1;
+}
+
 // Read packet without memory allocation, make sure buf is large enough!
 int _read_package_fast(uint8_t* buf, uint8_t* len, uint8_t* type) {
   uint16_t sync = wait_for_sync();
@@ -325,4 +367,44 @@ int pixy_get_image(
     free(bayer_buffer);
     
     return recvd;
+}
+
+int pixy_get_barcodes(barcode** codes) {
+  pixy_packet_send(NULL, 0, 0x77, 0);
+
+  uint8_t* res = 0;
+  uint8_t res_len = 0;
+  uint8_t res_type = 0;
+  if(!pixy_packet_recv(&res, &res_len, &res_type)){
+    if(res_type == 0x78){
+
+      uint8_t n_codes = 0;
+      for(int i=0;i<res_len;){
+        n_codes += 1;
+        i += (2+res[i+1]);
+      }
+      *codes = malloc(sizeof(barcode)*n_codes);
+
+      uint8_t *pt = res;
+      for(int i=0;i<n_codes;i++){
+        (*codes + i)->type = pt[0];
+        (*codes + i)->len = pt[1];
+        (*codes + i)->data = malloc(pt[1]);
+        memcpy((*codes + i)->data, pt+2, pt[1]);
+        pt += 2 + pt[1];
+      }
+      free(res);
+      return n_codes;
+    } else if (res_type == 0x3) {
+      printf("Error: cannot get barcodes, error code: %d\n", res[0]);
+    } else {
+      printf("Error: cannot get barcodes, response: %d\n", res_type);
+    }
+    
+    free(res);
+  } else {
+    printf("Error: recv packet for obtaining barcodes failed!\n");
+  }
+  
+  return -1;
 }

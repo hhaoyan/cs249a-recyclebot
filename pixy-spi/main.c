@@ -10,44 +10,74 @@ int main(void) {
 
   uint16_t width, height;
   pixy_get_resolution(&width, &height);
-  pixy_set_lamp(0, 0);
+  pixy_set_lamp(1, 0);
 
-  uint8_t* image = malloc(width * height * 3);
-  FILE* file;
+  line_feature* features;
+  barcode* barcodes;
   while(1){
     /*
-    pixy_block* blocks;
-    int n_blocks = pixy_get_blocks(1, 0xff, &blocks);
-    wait_ms(500);
-    n_blocks = pixy_get_blocks(1, 0xff, &blocks);
-    printf("Found %d blocks\n", n_blocks);
-    wait_ms(500);
-    n_blocks = pixy_get_blocks(1, 0xff, &blocks); 
-    printf("Found %d blocks\n", n_blocks);
-    
-    wait_ms(500);
-    n_blocks = pixy_get_blocks(1, 0xff, &blocks); 
-    printf("Found %d blocks\n", n_blocks);
-    
-    if(n_blocks >= 0){
-      printf("Found %d blocks\n", n_blocks);
-      for(int i=0;i<n_blocks;i++){
-        pixy_block* block = blocks+i;
-        printf("Block sig: %d, center: %d,%d; size: %dx%d, color angle: %d,"
-               "traking index: %d, age: %d\n",
-               block->sig, block->x, block->y, block->width, block->height, 
-               block->color_angle, block->track_index, block->age);
-      }
-      free(blocks);
-    }
-    */
-    printf("Start reading... \n");
-    printf("%d pixels\n", 
-      pixy_get_image(width, height, image));
-    printf("Found %d QR codes\n",
-      pixy_decode_qr(width, height, image));
-    pixy_write_image("image.bmp", width, height, image);
+    printf("*******Request line features*******\n");
 
+    int n_features = pixy_get_line_features(
+      LINE_FEA_REQ_MAIN, 
+      LINE_FEA_VECTOR|LINE_FEA_INTERSECTION|LINE_FEA_BARCODE,
+      &features);
+
+    if(n_features > 0){
+      for(int i=0;i<n_features;i++){
+        switch(features[i].type){
+          case LINE_FEA_VECTOR:
+          {
+            for(int j = 0;j<features[i].len;j+=6){
+              uint8_t *data = ((uint8_t*)features[i].data) + j;
+              printf("Vector: (%d,%d) -> (%d,%d), index: %d, flags: %d\n",
+                data[0], data[1], data[2], data[3], data[4], data[5]);
+            }
+          }
+          break;
+
+          case LINE_FEA_INTERSECTION: 
+          {}
+          break;
+
+          case LINE_FEA_BARCODE:
+          {
+            for(int j = 0;j<features[i].len;j+=4){
+              uint8_t *data = ((uint8_t*)features[i].data) + j;
+              printf("Barcode: (%d,%d), code: %d, flags: %d\n",
+                data[0], data[1], data[3], data[2]);
+            }
+          }
+          break;
+
+          default:
+          break;
+        }
+        free(features[i].data);
+      }
+      free(features);
+    }else if(n_features==0){
+      printf("No line features\n");
+    }else{
+      printf("Read from Pixy error!\n");
+    }*/
+    
+    printf("*******Request bar codes*******\n");
+
+    int n_codes = pixy_get_barcodes(&barcodes);
+
+    if(n_codes > 0){
+      for(int i=0;i<n_codes;i++){
+        printf("Code type %d, length %d, data: %s\n", 
+          barcodes[i].type, barcodes[i].len, barcodes[i].data);
+        free(barcodes[i].data);
+      }
+      free(barcodes);
+    }else if(n_codes==0){
+      printf("No barcodes\n");
+    }else{
+      printf("Read from Pixy error!\n");
+    }
     wait_ms(1000);
   }
 }
