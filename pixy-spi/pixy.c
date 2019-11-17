@@ -411,8 +411,43 @@ int pixy_get_barcodes(barcode** codes) {
 
 int pixy_get_line_vector(
   uint8_t *x0, uint8_t *y0, uint8_t *x1, uint8_t *y1) {
-  *x0 = 0xff >> 2;
-  *x1 = 0xff >> 2;
-  *y0 = 0;
-  *y1 = 0xff;
+
+  line_feature* features;
+
+  int n_features = pixy_get_line_features(
+    LINE_FEA_REQ_MAIN, 
+    LINE_FEA_VECTOR,
+    &features);
+  int main_vector_found = 0;
+
+  if(n_features > 0){
+    for(int i=0;i<n_features;i++){
+      switch(features[i].type){
+        case LINE_FEA_VECTOR:
+        {
+          if(features[i].len >= 6){
+            main_vector_found = 1;
+            uint8_t *data = ((uint8_t*)features[i].data);
+            *x0 = (uint8_t)((uint16_t)(data[0])*255/79);
+            *y0 = (uint8_t)((uint16_t)(data[1])*255/52);
+            *x1 = (uint8_t)((uint16_t)(data[2])*255/79);
+            *y1 = (uint8_t)((uint16_t)(data[3])*255/52);
+            printf("pixy_get_line_vector: vector found: (%d,%d)->(%d,%d)\n", *x0, *y0, *x1, *y1);
+          }
+        }
+        break;
+
+        default:
+        break;
+      }
+      free(features[i].data);
+    }
+    free(features);
+  }else if(n_features==0){
+    printf("pixy_get_line_vector: no line features\n");
+  }else{
+    printf("pixy_get_line_vector: read from Pixy error!\n");
+  }
+
+  return !main_vector_found;
 }
