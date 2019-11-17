@@ -408,3 +408,11 @@ int pixy_get_barcodes(barcode** codes) {
   
   return -1;
 }
+
+int pixy_get_line_vector(
+  uint8_t *x0, uint8_t *y0, uint8_t *x1, uint8_t *y1) {
+  *x0 = 0xff >> 2;
+  *x1 = 0xff >> 2;
+  *y0 = 0;
+  *y1 = 0xff;
+}

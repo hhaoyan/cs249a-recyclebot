@@ -85,4 +85,9 @@ extern int pixy_decode_qr(
   uint16_t width, uint16_t height,
   uint8_t* rgb);
 
+// Return the detected line vector, return 0 if success.
+// all coordinates are from 0x0 to 0xff.
+extern int pixy_get_line_vector(
+  uint8_t *x0, uint8_t *y0, uint8_t *x1, uint8_t *y1);
+
 #endif
