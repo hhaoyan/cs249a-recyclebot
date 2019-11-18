@@ -109,7 +109,7 @@ int main(void) {
   // loop forever, running state machine
   while (1) {
     // read sensors from robot
-    pixy_get_line_vector(&x0, &y0, &x1, &y1);
+    kobukiSensorPoll(&sensors);
 
     // delay before continuing
     // Note: removing this delay will make responses quicker, but will result

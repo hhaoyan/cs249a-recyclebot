@@ -7,7 +7,7 @@
 #include <math.h>
 #include "states.h"
 
-extern float get_theta(int *x0, int *x1, int *y0, int *y1);
+extern float get_theta();
 
 extern void print_state(states current_state);
 extern void print_turn(turns current_turn);
