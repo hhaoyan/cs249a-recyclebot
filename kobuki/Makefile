@@ -8,8 +8,13 @@ SOFTDEVICE_MODEL = s132
 
 # Source and header files with yakindu stuff
 APP_HEADER_PATHS += .
+APP_HEADER_PATHS += ../pixy-spi
 APP_SOURCE_PATHS += .
-APP_SOURCES = $(notdir $(wildcard ./*.c)) $(notdir $(wildcard src-gen/*.c))
+APP_SOURCES = \
+	$(notdir $(wildcard ./*.c)) \
+	$(notdir $(wildcard src-gen/*.c)) \
+	../pixy-spi/pixy.c\
+	../pixy-spi/nrf_spi.c
 
 BUCKLER_DIR = ../buckler/software/
 
