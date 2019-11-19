@@ -1,7 +1,3 @@
-
-
-
-
 #define PI 3.14159265
 
 #include <stdbool.h>
@@ -32,8 +28,6 @@
 #include "mpu9250.h"
 
 extern KobukiSensors_t sensors;
-
-
 
 uint16_t read_encoder(){
   return sensors.leftWheelEncoder;
