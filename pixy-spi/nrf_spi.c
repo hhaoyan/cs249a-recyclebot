@@ -5,7 +5,11 @@
 
 #include "pixy.h"
 
-nrf_drv_spi_t spi_instance = NRF_DRV_SPI_INSTANCE(1);
+#if  !defined(NRFX_SPI2_ENABLED) || !defined(SPI2_ENABLED)
+#error "You must add -DNRFX_SPI2_ENABLED and -DSPI2_ENABLED in your CFLAGS!"
+#endif
+
+nrf_drv_spi_t spi_instance = NRF_DRV_SPI_INSTANCE(2);
 nrf_drv_spi_config_t spi_config = {
   .sck_pin = BUCKLER_SD_SCLK,
   .mosi_pin = BUCKLER_SD_MOSI,

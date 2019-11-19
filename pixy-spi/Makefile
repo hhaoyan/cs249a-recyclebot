@@ -15,6 +15,10 @@ APP_SOURCES = \
 	nrf_spi.c \
 	pixy.c \
 
+CFLAGS += \
+	-DNRFX_SPI2_ENABLED \
+	-DSPI2_ENABLED
+
 BUCKLER_DIR = ../buckler/software/
 
 # Path to base of nRF52-base repo
