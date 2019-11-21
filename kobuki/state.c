@@ -1,7 +1,17 @@
-#include "state.h"
-#include "util.h"
+#include <math.h>
+#include <stddef.h>
 
-static KobukiSensors_t sensors = {0};
+#include <kobukiActuator.h>
+#include <kobukiSensorPoll.h>
+#include <kobukiSensorTypes.h>
+#include <mpu9250.h>
+#include <nrf_delay.h>
+
+#include "state.h"
+#include "platform_kobuki.h"
+#include "platform_bluetooth.h"
+
+KobukiSensors_t sensors = {0};
 static state_t state = Work;
 static float rotate = 0.0f;
 static float rot_diff = 0.0f;
@@ -12,7 +22,7 @@ static float normalize_rot(float x) {
 }
 
 static void work() {
-  display_string("work");
+  lcd_printf(LCD_LINE_0, "work");
 
   float new_rot = get_rotate();
   float diff = normalize_rot(new_rot - rotate);
@@ -33,10 +43,11 @@ static void rot_leave() {
 }
 
 static void rot() {
-  display_string("rot");
+  lcd_printf(LCD_LINE_0, "Rotate");
 
   float rot_now = normalize_rot(mpu9250_read_gyro_integration().z_axis);
-  display_float(rot_now);
+  lcd_printf(LCD_LINE_1, "%f", rot_now);
+
   if (fabs(rot_now) > fabs(rot_diff)) {
     rotate = normalize_rot(rotate + rot_now);
     state = Work;

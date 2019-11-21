@@ -21,17 +21,19 @@ APP_SOURCE_PATHS += \
 	./kobuki/ \
 	./
 
-APP_SOURCES = \
-	main.c \
-	state.c \
-	util.c \
-	helper_funcs.c \
+APP_SOURCES += \
 	kobukiActuator.c \
 	kobukiSensor.c \
 	kobukiSensorPoll.c \
 	kobukiUART.c \
 	kobukiUtilities.c \
-	Robot_template.c \
+
+APP_SOURCES += \
+	platform_bluetooth.c \
+	platform_kobuki.c\
+	main.c \
+	state.c \
+	helper_funcs.c \
 	Robot_template.c \
 	pixy.c \
 	nrf_spi.c
