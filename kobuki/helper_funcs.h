@@ -6,8 +6,6 @@
 
 extern float normalize_rot(float x);
 
-extern float get_line_tracking_theta();
-
 extern float update_dist(float dist, uint16_t prev_encoder, bool is_forward);
 
 extern float read_tilt_theta(void);

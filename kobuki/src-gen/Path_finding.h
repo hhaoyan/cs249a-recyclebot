@@ -4,7 +4,6 @@
 #define PATH_FINDING_H_
 
 #include "../platform_kobuki.h"
-#include "../helper_funcs.h"
 #include "../src/sc_types.h"
 
 #ifdef __cplusplus
@@ -16,26 +15,22 @@ extern "C" {
 
 /*! Define number of states in the state enum */
 
-#define PATH_FINDING_STATE_COUNT 4
+#define PATH_FINDING_STATE_COUNT 2
 
 /*! Define dimension of the state configuration vector for orthogonal states. */
 #define PATH_FINDING_MAX_ORTHOGONAL_STATES 1
 
 
 /*! Define indices of states in the StateConfVector */
-#define SCVI_PATH_FINDING_MAIN_REGION_OFF 0
-#define SCVI_PATH_FINDING_MAIN_REGION_DRIVING 0
-#define SCVI_PATH_FINDING_MAIN_REGION_LEFT 0
-#define SCVI_PATH_FINDING_MAIN_REGION_RIGHT 0
+#define SCVI_PATH_FINDING_MAIN_REGION_STATION 0
+#define SCVI_PATH_FINDING_MAIN_REGION_FOLLOWING 0
 
 /*! Enumeration of all states */ 
 typedef enum
 {
 	Path_finding_last_state,
-	Path_finding_main_region_OFF,
-	Path_finding_main_region_DRIVING,
-	Path_finding_main_region_LEFT,
-	Path_finding_main_region_RIGHT
+	Path_finding_main_region_Station,
+	Path_finding_main_region_Following
 } Path_findingStates;
 
 
@@ -47,15 +42,13 @@ typedef enum
 /*! Type definition of the data structure for the Path_findingIface interface scope. */
 typedef struct
 {
-	sc_boolean button;
-	uint16_t prev_encoder;
-	float angle;
-	sc_boolean cliffLeft;
-	sc_boolean cliffRight;
-	float theta;
-	float psi;
-	float dist;
-	float x_off;
+	int16_t speed_left;
+	int16_t speed_right;
+	sc_boolean has_vec;
+	uint8_t v_start_x;
+	uint8_t v_start_y;
+	uint8_t v_end_x;
+	uint8_t v_end_y;
 } Path_findingIface;
 
 
@@ -88,42 +81,34 @@ extern void path_finding_exit(Path_finding* handle);
 extern void path_finding_runCycle(Path_finding* handle);
 
 
-/*! Gets the value of the variable 'button' that is defined in the default interface scope. */ 
-extern sc_boolean path_findingIface_get_button(const Path_finding* handle);
-/*! Sets the value of the variable 'button' that is defined in the default interface scope. */ 
-extern void path_findingIface_set_button(Path_finding* handle, sc_boolean value);
-/*! Gets the value of the variable 'prev_encoder' that is defined in the default interface scope. */ 
-extern uint16_t path_findingIface_get_prev_encoder(const Path_finding* handle);
-/*! Sets the value of the variable 'prev_encoder' that is defined in the default interface scope. */ 
-extern void path_findingIface_set_prev_encoder(Path_finding* handle, uint16_t value);
-/*! Gets the value of the variable 'angle' that is defined in the default interface scope. */ 
-extern float path_findingIface_get_angle(const Path_finding* handle);
-/*! Sets the value of the variable 'angle' that is defined in the default interface scope. */ 
-extern void path_findingIface_set_angle(Path_finding* handle, float value);
-/*! Gets the value of the variable 'cliffLeft' that is defined in the default interface scope. */ 
-extern sc_boolean path_findingIface_get_cliffLeft(const Path_finding* handle);
-/*! Sets the value of the variable 'cliffLeft' that is defined in the default interface scope. */ 
-extern void path_findingIface_set_cliffLeft(Path_finding* handle, sc_boolean value);
-/*! Gets the value of the variable 'cliffRight' that is defined in the default interface scope. */ 
-extern sc_boolean path_findingIface_get_cliffRight(const Path_finding* handle);
-/*! Sets the value of the variable 'cliffRight' that is defined in the default interface scope. */ 
-extern void path_findingIface_set_cliffRight(Path_finding* handle, sc_boolean value);
-/*! Gets the value of the variable 'theta' that is defined in the default interface scope. */ 
-extern float path_findingIface_get_theta(const Path_finding* handle);
-/*! Sets the value of the variable 'theta' that is defined in the default interface scope. */ 
-extern void path_findingIface_set_theta(Path_finding* handle, float value);
-/*! Gets the value of the variable 'psi' that is defined in the default interface scope. */ 
-extern float path_findingIface_get_psi(const Path_finding* handle);
-/*! Sets the value of the variable 'psi' that is defined in the default interface scope. */ 
-extern void path_findingIface_set_psi(Path_finding* handle, float value);
-/*! Gets the value of the variable 'dist' that is defined in the default interface scope. */ 
-extern float path_findingIface_get_dist(const Path_finding* handle);
-/*! Sets the value of the variable 'dist' that is defined in the default interface scope. */ 
-extern void path_findingIface_set_dist(Path_finding* handle, float value);
-/*! Gets the value of the variable 'x_off' that is defined in the default interface scope. */ 
-extern float path_findingIface_get_x_off(const Path_finding* handle);
-/*! Sets the value of the variable 'x_off' that is defined in the default interface scope. */ 
-extern void path_findingIface_set_x_off(Path_finding* handle, float value);
+/*! Gets the value of the variable 'speed_left' that is defined in the default interface scope. */ 
+extern int16_t path_findingIface_get_speed_left(const Path_finding* handle);
+/*! Sets the value of the variable 'speed_left' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_speed_left(Path_finding* handle, int16_t value);
+/*! Gets the value of the variable 'speed_right' that is defined in the default interface scope. */ 
+extern int16_t path_findingIface_get_speed_right(const Path_finding* handle);
+/*! Sets the value of the variable 'speed_right' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_speed_right(Path_finding* handle, int16_t value);
+/*! Gets the value of the variable 'has_vec' that is defined in the default interface scope. */ 
+extern sc_boolean path_findingIface_get_has_vec(const Path_finding* handle);
+/*! Sets the value of the variable 'has_vec' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_has_vec(Path_finding* handle, sc_boolean value);
+/*! Gets the value of the variable 'v_start_x' that is defined in the default interface scope. */ 
+extern uint8_t path_findingIface_get_v_start_x(const Path_finding* handle);
+/*! Sets the value of the variable 'v_start_x' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_v_start_x(Path_finding* handle, uint8_t value);
+/*! Gets the value of the variable 'v_start_y' that is defined in the default interface scope. */ 
+extern uint8_t path_findingIface_get_v_start_y(const Path_finding* handle);
+/*! Sets the value of the variable 'v_start_y' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_v_start_y(Path_finding* handle, uint8_t value);
+/*! Gets the value of the variable 'v_end_x' that is defined in the default interface scope. */ 
+extern uint8_t path_findingIface_get_v_end_x(const Path_finding* handle);
+/*! Sets the value of the variable 'v_end_x' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_v_end_x(Path_finding* handle, uint8_t value);
+/*! Gets the value of the variable 'v_end_y' that is defined in the default interface scope. */ 
+extern uint8_t path_findingIface_get_v_end_y(const Path_finding* handle);
+/*! Sets the value of the variable 'v_end_y' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_v_end_y(Path_finding* handle, uint8_t value);
 
 /*!
  * Checks whether the state machine is active (until 2.4.1 this method was used for states).

@@ -28,17 +28,18 @@ int main(void) {
   init_state_charts();
   pixy_init();
 
-  pixy_set_lamp(0, 0);
+  // Turn on the lamp
+  pixy_set_lamp(1, 0);
 
   // loop forever, running state machine
   uint32_t cycle_idx = 0;
   while (1) {
     update_sensors();
-    if(cycle_idx++ % 10)
+    if(cycle_idx++ % 10 == 0)
       printf("Running %ld cycle\n", cycle_idx);
 
     // iterate statechart
-    rotate_runCycle(&r_fsm);
+    // rotate_runCycle(&r_fsm);
     path_finding_runCycle(&pf_fsm);
 
     // Delay before continuing

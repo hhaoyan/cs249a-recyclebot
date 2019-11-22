@@ -16,6 +16,7 @@
 #include <nrf_log_default_backends.h>
 #include <nrf_pwr_mgmt.h>
 
+#include "pixy.h"
 #include "platform_kobuki.h"
 
 // I2C manager
@@ -25,6 +26,8 @@ NRF_TWI_MNGR_DEF(twi_mngr_instance, 5, 0);
 static nrf_drv_spi_t spi_instance = NRF_DRV_SPI_INSTANCE(1);
 
 KobukiSensors_t sensors = {0};
+bool pixy_line_detected = false;
+uint8_t pixy_line_start[2], pixy_line_end[2];
 
 void init_kobuki() {
 	ret_code_t error_code = NRF_SUCCESS;
@@ -139,4 +142,7 @@ void stop_kobuki(){
 
 void update_sensors() {
   kobukiSensorPoll(&sensors);
+  pixy_line_detected = (0 == pixy_get_line_vector(
+    &pixy_line_start[0], &pixy_line_start[1], 
+    &pixy_line_end[0], &pixy_line_end[1]));
 }

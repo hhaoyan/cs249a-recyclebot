@@ -10,6 +10,8 @@ typedef enum {
 } lcd_line_t;
 
 extern KobukiSensors_t sensors;
+extern bool pixy_line_detected;
+extern uint8_t pixy_line_start[2], pixy_line_end[2];
 
 extern void init_kobuki();
 extern void update_sensors();
@@ -21,6 +23,11 @@ extern bool is_center_bumper();
 extern bool is_left_bumper();
 extern bool is_right_bumper();
 
+inline bool is_vec_detected(){return pixy_line_detected;}
+inline uint8_t vec_start_x(){return pixy_line_start[0];}
+inline uint8_t vec_start_y(){return pixy_line_start[1];}
+inline uint8_t vec_end_x(){return pixy_line_end[0];}
+inline uint8_t vec_end_y(){return pixy_line_end[1];}
 extern bool is_button_press();
 
 extern void start_gyro();

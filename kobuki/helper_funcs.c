@@ -7,7 +7,6 @@
 #include <mpu9250.h>
 
 #include "helper_funcs.h"
-#include "pixy.h"
 #include "platform_kobuki.h"
 
 float normalize_rot(float x) {
@@ -49,10 +48,4 @@ float read_tilt_psi(void){
 
 float get_abs(float var){
   return fabs(var);
-}
-
-float get_line_tracking_theta() {
-  uint8_t x0, y0, x1, y1;
-  pixy_get_line_vector(&x0, &y0, &x1, &y1);
-  return tan((y1 - y0)/(x1 - x0))*(180/M_PI);
 }

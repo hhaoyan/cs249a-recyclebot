@@ -7,26 +7,19 @@
 */
 
 /* prototypes of all internal functions */
-static void enact_main_region_OFF(Path_finding* handle);
-static void enact_main_region_DRIVING(Path_finding* handle);
-static void enact_main_region_LEFT(Path_finding* handle);
-static void enact_main_region_RIGHT(Path_finding* handle);
-static void enseq_main_region_OFF_default(Path_finding* handle);
-static void enseq_main_region_DRIVING_default(Path_finding* handle);
-static void enseq_main_region_LEFT_default(Path_finding* handle);
-static void enseq_main_region_RIGHT_default(Path_finding* handle);
+static void enact_main_region_Station(Path_finding* handle);
+static void enact_main_region_Following(Path_finding* handle);
+static void exact_main_region_Following(Path_finding* handle);
+static void enseq_main_region_Station_default(Path_finding* handle);
+static void enseq_main_region_Following_default(Path_finding* handle);
 static void enseq_main_region_default(Path_finding* handle);
-static void exseq_main_region_OFF(Path_finding* handle);
-static void exseq_main_region_DRIVING(Path_finding* handle);
-static void exseq_main_region_LEFT(Path_finding* handle);
-static void exseq_main_region_RIGHT(Path_finding* handle);
+static void exseq_main_region_Station(Path_finding* handle);
+static void exseq_main_region_Following(Path_finding* handle);
 static void exseq_main_region(Path_finding* handle);
 static void react_main_region__entry_Default(Path_finding* handle);
 static sc_boolean react(Path_finding* handle);
-static sc_boolean main_region_OFF_react(Path_finding* handle, const sc_boolean try_transition);
-static sc_boolean main_region_DRIVING_react(Path_finding* handle, const sc_boolean try_transition);
-static sc_boolean main_region_LEFT_react(Path_finding* handle, const sc_boolean try_transition);
-static sc_boolean main_region_RIGHT_react(Path_finding* handle, const sc_boolean try_transition);
+static sc_boolean main_region_Station_react(Path_finding* handle, const sc_boolean try_transition);
+static sc_boolean main_region_Following_react(Path_finding* handle, const sc_boolean try_transition);
 static void clearInEvents(Path_finding* handle);
 static void clearOutEvents(Path_finding* handle);
 
@@ -47,15 +40,13 @@ void path_finding_init(Path_finding* handle)
 	clearOutEvents(handle);
 	
 	/* Default init sequence for statechart path_finding */
-	handle->iface.button = bool_false;
-	handle->iface.prev_encoder = 0;
-	handle->iface.angle = 0.0f;
-	handle->iface.cliffLeft = bool_false;
-	handle->iface.cliffRight = bool_false;
-	handle->iface.theta = 0.0f;
-	handle->iface.psi = 0.0f;
-	handle->iface.dist = 0.0f;
-	handle->iface.x_off = 0.0f;
+	handle->iface.speed_left = 0;
+	handle->iface.speed_right = 0;
+	handle->iface.has_vec = bool_false;
+	handle->iface.v_start_x = 0;
+	handle->iface.v_start_y = 0;
+	handle->iface.v_end_x = 0;
+	handle->iface.v_end_y = 0;
 }
 
 void path_finding_enter(Path_finding* handle)
@@ -74,24 +65,14 @@ void path_finding_runCycle(Path_finding* handle)
 			
 		switch (handle->stateConfVector[handle->stateConfVectorPosition])
 		{
-		case Path_finding_main_region_OFF:
+		case Path_finding_main_region_Station:
 		{
-			main_region_OFF_react(handle, bool_true);
+			main_region_Station_react(handle, bool_true);
 			break;
 		}
-		case Path_finding_main_region_DRIVING:
+		case Path_finding_main_region_Following:
 		{
-			main_region_DRIVING_react(handle, bool_true);
-			break;
-		}
-		case Path_finding_main_region_LEFT:
-		{
-			main_region_LEFT_react(handle, bool_true);
-			break;
-		}
-		case Path_finding_main_region_RIGHT:
-		{
-			main_region_RIGHT_react(handle, bool_true);
+			main_region_Following_react(handle, bool_true);
 			break;
 		}
 		default:
@@ -136,20 +117,12 @@ sc_boolean path_finding_isStateActive(const Path_finding* handle, Path_findingSt
 	sc_boolean result = bool_false;
 	switch (state)
 	{
-		case Path_finding_main_region_OFF :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_PATH_FINDING_MAIN_REGION_OFF] == Path_finding_main_region_OFF
+		case Path_finding_main_region_Station :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_PATH_FINDING_MAIN_REGION_STATION] == Path_finding_main_region_Station
 			);
 			break;
-		case Path_finding_main_region_DRIVING :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_PATH_FINDING_MAIN_REGION_DRIVING] == Path_finding_main_region_DRIVING
-			);
-			break;
-		case Path_finding_main_region_LEFT :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_PATH_FINDING_MAIN_REGION_LEFT] == Path_finding_main_region_LEFT
-			);
-			break;
-		case Path_finding_main_region_RIGHT :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_PATH_FINDING_MAIN_REGION_RIGHT] == Path_finding_main_region_RIGHT
+		case Path_finding_main_region_Following :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_PATH_FINDING_MAIN_REGION_FOLLOWING] == Path_finding_main_region_Following
 			);
 			break;
 		default:
@@ -169,143 +142,104 @@ static void clearOutEvents(Path_finding* handle)
 
 
 
-sc_boolean path_findingIface_get_button(const Path_finding* handle)
+int16_t path_findingIface_get_speed_left(const Path_finding* handle)
 {
-	return handle->iface.button;
+	return handle->iface.speed_left;
 }
-void path_findingIface_set_button(Path_finding* handle, sc_boolean value)
+void path_findingIface_set_speed_left(Path_finding* handle, int16_t value)
 {
-	handle->iface.button = value;
+	handle->iface.speed_left = value;
 }
-uint16_t path_findingIface_get_prev_encoder(const Path_finding* handle)
+int16_t path_findingIface_get_speed_right(const Path_finding* handle)
 {
-	return handle->iface.prev_encoder;
+	return handle->iface.speed_right;
 }
-void path_findingIface_set_prev_encoder(Path_finding* handle, uint16_t value)
+void path_findingIface_set_speed_right(Path_finding* handle, int16_t value)
 {
-	handle->iface.prev_encoder = value;
+	handle->iface.speed_right = value;
 }
-float path_findingIface_get_angle(const Path_finding* handle)
+sc_boolean path_findingIface_get_has_vec(const Path_finding* handle)
 {
-	return handle->iface.angle;
+	return handle->iface.has_vec;
 }
-void path_findingIface_set_angle(Path_finding* handle, float value)
+void path_findingIface_set_has_vec(Path_finding* handle, sc_boolean value)
 {
-	handle->iface.angle = value;
+	handle->iface.has_vec = value;
 }
-sc_boolean path_findingIface_get_cliffLeft(const Path_finding* handle)
+uint8_t path_findingIface_get_v_start_x(const Path_finding* handle)
 {
-	return handle->iface.cliffLeft;
+	return handle->iface.v_start_x;
 }
-void path_findingIface_set_cliffLeft(Path_finding* handle, sc_boolean value)
+void path_findingIface_set_v_start_x(Path_finding* handle, uint8_t value)
 {
-	handle->iface.cliffLeft = value;
+	handle->iface.v_start_x = value;
 }
-sc_boolean path_findingIface_get_cliffRight(const Path_finding* handle)
+uint8_t path_findingIface_get_v_start_y(const Path_finding* handle)
 {
-	return handle->iface.cliffRight;
+	return handle->iface.v_start_y;
 }
-void path_findingIface_set_cliffRight(Path_finding* handle, sc_boolean value)
+void path_findingIface_set_v_start_y(Path_finding* handle, uint8_t value)
 {
-	handle->iface.cliffRight = value;
+	handle->iface.v_start_y = value;
 }
-float path_findingIface_get_theta(const Path_finding* handle)
+uint8_t path_findingIface_get_v_end_x(const Path_finding* handle)
 {
-	return handle->iface.theta;
+	return handle->iface.v_end_x;
 }
-void path_findingIface_set_theta(Path_finding* handle, float value)
+void path_findingIface_set_v_end_x(Path_finding* handle, uint8_t value)
 {
-	handle->iface.theta = value;
+	handle->iface.v_end_x = value;
 }
-float path_findingIface_get_psi(const Path_finding* handle)
+uint8_t path_findingIface_get_v_end_y(const Path_finding* handle)
 {
-	return handle->iface.psi;
+	return handle->iface.v_end_y;
 }
-void path_findingIface_set_psi(Path_finding* handle, float value)
+void path_findingIface_set_v_end_y(Path_finding* handle, uint8_t value)
 {
-	handle->iface.psi = value;
-}
-float path_findingIface_get_dist(const Path_finding* handle)
-{
-	return handle->iface.dist;
-}
-void path_findingIface_set_dist(Path_finding* handle, float value)
-{
-	handle->iface.dist = value;
-}
-float path_findingIface_get_x_off(const Path_finding* handle)
-{
-	return handle->iface.x_off;
-}
-void path_findingIface_set_x_off(Path_finding* handle, float value)
-{
-	handle->iface.x_off = value;
+	handle->iface.v_end_y = value;
 }
 
 /* implementations of all internal functions */
 
-/* Entry action for state 'OFF'. */
-static void enact_main_region_OFF(Path_finding* handle)
+/* Entry action for state 'Station'. */
+static void enact_main_region_Station(Path_finding* handle)
 {
-	/* Entry action for state 'OFF'. */
-	handle->iface.button = bool_false;
+	/* Entry action for state 'Station'. */
+	lcd_printf(0, "NO LINE");
 }
 
-/* Entry action for state 'DRIVING'. */
-static void enact_main_region_DRIVING(Path_finding* handle)
+/* Entry action for state 'Following'. */
+static void enact_main_region_Following(Path_finding* handle)
 {
-	/* Entry action for state 'DRIVING'. */
-	handle->iface.button = bool_false;
-	handle->iface.theta = 0.0f;
+	/* Entry action for state 'Following'. */
+	lcd_printf(0, "FOLLOWING");
+	handle->iface.speed_left = 50;
+	handle->iface.speed_right = 50;
 }
 
-/* Entry action for state 'LEFT'. */
-static void enact_main_region_LEFT(Path_finding* handle)
+/* Exit action for state 'Following'. */
+static void exact_main_region_Following(Path_finding* handle)
 {
-	/* Entry action for state 'LEFT'. */
-	handle->iface.button = bool_false;
+	/* Exit action for state 'Following'. */
+	lcd_printf(1, "           ");
+	stop_kobuki();
 }
 
-/* Entry action for state 'RIGHT'. */
-static void enact_main_region_RIGHT(Path_finding* handle)
+/* 'default' enter sequence for state Station */
+static void enseq_main_region_Station_default(Path_finding* handle)
 {
-	/* Entry action for state 'RIGHT'. */
-	handle->iface.button = bool_false;
-}
-
-/* 'default' enter sequence for state OFF */
-static void enseq_main_region_OFF_default(Path_finding* handle)
-{
-	/* 'default' enter sequence for state OFF */
-	enact_main_region_OFF(handle);
-	handle->stateConfVector[0] = Path_finding_main_region_OFF;
+	/* 'default' enter sequence for state Station */
+	enact_main_region_Station(handle);
+	handle->stateConfVector[0] = Path_finding_main_region_Station;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* 'default' enter sequence for state DRIVING */
-static void enseq_main_region_DRIVING_default(Path_finding* handle)
+/* 'default' enter sequence for state Following */
+static void enseq_main_region_Following_default(Path_finding* handle)
 {
-	/* 'default' enter sequence for state DRIVING */
-	enact_main_region_DRIVING(handle);
-	handle->stateConfVector[0] = Path_finding_main_region_DRIVING;
-	handle->stateConfVectorPosition = 0;
-}
-
-/* 'default' enter sequence for state LEFT */
-static void enseq_main_region_LEFT_default(Path_finding* handle)
-{
-	/* 'default' enter sequence for state LEFT */
-	enact_main_region_LEFT(handle);
-	handle->stateConfVector[0] = Path_finding_main_region_LEFT;
-	handle->stateConfVectorPosition = 0;
-}
-
-/* 'default' enter sequence for state RIGHT */
-static void enseq_main_region_RIGHT_default(Path_finding* handle)
-{
-	/* 'default' enter sequence for state RIGHT */
-	enact_main_region_RIGHT(handle);
-	handle->stateConfVector[0] = Path_finding_main_region_RIGHT;
+	/* 'default' enter sequence for state Following */
+	enact_main_region_Following(handle);
+	handle->stateConfVector[0] = Path_finding_main_region_Following;
 	handle->stateConfVectorPosition = 0;
 }
 
@@ -316,36 +250,21 @@ static void enseq_main_region_default(Path_finding* handle)
 	react_main_region__entry_Default(handle);
 }
 
-/* Default exit sequence for state OFF */
-static void exseq_main_region_OFF(Path_finding* handle)
+/* Default exit sequence for state Station */
+static void exseq_main_region_Station(Path_finding* handle)
 {
-	/* Default exit sequence for state OFF */
+	/* Default exit sequence for state Station */
 	handle->stateConfVector[0] = Path_finding_last_state;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* Default exit sequence for state DRIVING */
-static void exseq_main_region_DRIVING(Path_finding* handle)
+/* Default exit sequence for state Following */
+static void exseq_main_region_Following(Path_finding* handle)
 {
-	/* Default exit sequence for state DRIVING */
+	/* Default exit sequence for state Following */
 	handle->stateConfVector[0] = Path_finding_last_state;
 	handle->stateConfVectorPosition = 0;
-}
-
-/* Default exit sequence for state LEFT */
-static void exseq_main_region_LEFT(Path_finding* handle)
-{
-	/* Default exit sequence for state LEFT */
-	handle->stateConfVector[0] = Path_finding_last_state;
-	handle->stateConfVectorPosition = 0;
-}
-
-/* Default exit sequence for state RIGHT */
-static void exseq_main_region_RIGHT(Path_finding* handle)
-{
-	/* Default exit sequence for state RIGHT */
-	handle->stateConfVector[0] = Path_finding_last_state;
-	handle->stateConfVectorPosition = 0;
+	exact_main_region_Following(handle);
 }
 
 /* Default exit sequence for region main region */
@@ -355,24 +274,14 @@ static void exseq_main_region(Path_finding* handle)
 	/* Handle exit of all possible states (of path_finding.main_region) at position 0... */
 	switch(handle->stateConfVector[ 0 ])
 	{
-		case Path_finding_main_region_OFF :
+		case Path_finding_main_region_Station :
 		{
-			exseq_main_region_OFF(handle);
+			exseq_main_region_Station(handle);
 			break;
 		}
-		case Path_finding_main_region_DRIVING :
+		case Path_finding_main_region_Following :
 		{
-			exseq_main_region_DRIVING(handle);
-			break;
-		}
-		case Path_finding_main_region_LEFT :
-		{
-			exseq_main_region_LEFT(handle);
-			break;
-		}
-		case Path_finding_main_region_RIGHT :
-		{
-			exseq_main_region_RIGHT(handle);
+			exseq_main_region_Following(handle);
 			break;
 		}
 		default: break;
@@ -383,7 +292,7 @@ static void exseq_main_region(Path_finding* handle)
 static void react_main_region__entry_Default(Path_finding* handle)
 {
 	/* Default react sequence for initial entry  */
-	enseq_main_region_OFF_default(handle);
+	enseq_main_region_Station_default(handle);
 }
 
 static sc_boolean react(Path_finding* handle) {
@@ -391,17 +300,17 @@ static sc_boolean react(Path_finding* handle) {
 	return bool_false;
 }
 
-static sc_boolean main_region_OFF_react(Path_finding* handle, const sc_boolean try_transition) {
-	/* The reactions of state OFF. */
+static sc_boolean main_region_Station_react(Path_finding* handle, const sc_boolean try_transition) {
+	/* The reactions of state Station. */
 	sc_boolean did_transition = try_transition;
 	if (try_transition == bool_true)
 	{ 
 		if ((react(handle)) == (bool_false))
 		{ 
-			if (handle->iface.button == bool_true)
+			if (handle->iface.has_vec == bool_true)
 			{ 
-				exseq_main_region_OFF(handle);
-				enseq_main_region_DRIVING_default(handle);
+				exseq_main_region_Station(handle);
+				enseq_main_region_Following_default(handle);
 			}  else
 			{
 				did_transition = bool_false;
@@ -411,58 +320,22 @@ static sc_boolean main_region_OFF_react(Path_finding* handle, const sc_boolean t
 	if ((did_transition) == (bool_false))
 	{ 
 		stop_kobuki();
-		handle->iface.button = is_button_press();
-		lcd_printf(0, "OFF");
-		lcd_printf(1, "Theta: %f", read_tilt_theta());
+		handle->iface.has_vec = is_vec_detected();
 	} 
 	return did_transition;
 }
 
-static sc_boolean main_region_DRIVING_react(Path_finding* handle, const sc_boolean try_transition) {
-	/* The reactions of state DRIVING. */
+static sc_boolean main_region_Following_react(Path_finding* handle, const sc_boolean try_transition) {
+	/* The reactions of state Following. */
 	sc_boolean did_transition = try_transition;
 	if (try_transition == bool_true)
 	{ 
 		if ((react(handle)) == (bool_false))
 		{ 
-			if ((handle->iface.theta) > (10))
+			if (handle->iface.has_vec == bool_false)
 			{ 
-				exseq_main_region_DRIVING(handle);
-				enseq_main_region_LEFT_default(handle);
-			}  else
-			{
-				if ((handle->iface.theta) < (10))
-				{ 
-					exseq_main_region_DRIVING(handle);
-					enseq_main_region_RIGHT_default(handle);
-				}  else
-				{
-					did_transition = bool_false;
-				}
-			}
-		} 
-	} 
-	if ((did_transition) == (bool_false))
-	{ 
-		drive_kobuki(150, 150);
-		lcd_printf(0, "DRIVING");
-		handle->iface.button = is_button_press();
-		handle->iface.theta = get_line_tracking_theta();
-	} 
-	return did_transition;
-}
-
-static sc_boolean main_region_LEFT_react(Path_finding* handle, const sc_boolean try_transition) {
-	/* The reactions of state LEFT. */
-	sc_boolean did_transition = try_transition;
-	if (try_transition == bool_true)
-	{ 
-		if ((react(handle)) == (bool_false))
-		{ 
-			if (((handle->iface.theta) < (10)) && ((handle->iface.theta) > (0)))
-			{ 
-				exseq_main_region_LEFT(handle);
-				enseq_main_region_DRIVING_default(handle);
+				exseq_main_region_Following(handle);
+				enseq_main_region_Station_default(handle);
 			}  else
 			{
 				did_transition = bool_false;
@@ -471,37 +344,18 @@ static sc_boolean main_region_LEFT_react(Path_finding* handle, const sc_boolean 
 	} 
 	if ((did_transition) == (bool_false))
 	{ 
-		drive_kobuki(100, 150);
-		lcd_printf(0, "TURN LEFT");
-		handle->iface.button = is_button_press();
-		handle->iface.theta = get_line_tracking_theta();
-	} 
-	return did_transition;
-}
-
-static sc_boolean main_region_RIGHT_react(Path_finding* handle, const sc_boolean try_transition) {
-	/* The reactions of state RIGHT. */
-	sc_boolean did_transition = try_transition;
-	if (try_transition == bool_true)
-	{ 
-		if ((react(handle)) == (bool_false))
-		{ 
-			if (((handle->iface.theta) < (10)) && ((handle->iface.theta) > (0)))
-			{ 
-				exseq_main_region_RIGHT(handle);
-				enseq_main_region_DRIVING_default(handle);
-			}  else
-			{
-				did_transition = bool_false;
-			}
-		} 
-	} 
-	if ((did_transition) == (bool_false))
-	{ 
-		drive_kobuki(150, 100);
-		lcd_printf(0, "TURN RIGHT");
-		handle->iface.button = is_button_press();
-		handle->iface.theta = get_line_tracking_theta();
+		handle->iface.has_vec = is_vec_detected();
+		handle->iface.v_start_x = vec_start_x();
+		handle->iface.v_start_y = vec_start_y();
+		handle->iface.v_end_x = vec_end_x();
+		handle->iface.v_end_y = vec_end_y();
+		lcd_printf(0, "FOLLOWING %d %d", handle->iface.v_end_x, handle->iface.v_end_y);
+		handle->iface.speed_left = (((handle->iface.v_end_x) > (120)) && ((handle->iface.v_end_x) < (134))) ? 50 : handle->iface.speed_left;
+		handle->iface.speed_right = (((handle->iface.v_end_x) > (120)) && ((handle->iface.v_end_x) < (134))) ? 50 : handle->iface.speed_right;
+		handle->iface.speed_left += ((handle->iface.v_end_x) <= (120)) ? 1 : 0;
+		handle->iface.speed_right += ((handle->iface.v_end_x) >= (134)) ? 1 : 0;
+		lcd_printf(1, "SPEED %d %d", handle->iface.speed_left, handle->iface.speed_right);
+		drive_kobuki(handle->iface.speed_left, handle->iface.speed_right);
 	} 
 	return did_transition;
 }
