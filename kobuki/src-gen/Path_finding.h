@@ -3,7 +3,6 @@
 #ifndef PATH_FINDING_H_
 #define PATH_FINDING_H_
 
-#include "../states.h"
 #include "../platform_kobuki.h"
 #include "../helper_funcs.h"
 #include "../src/sc_types.h"
@@ -38,10 +37,6 @@ typedef enum
 	Path_finding_main_region_LEFT,
 	Path_finding_main_region_RIGHT
 } Path_findingStates;
-
-
-
-
 
 
 

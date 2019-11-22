@@ -6,7 +6,6 @@
 #include "platform_bluetooth.h"
 #include "Path_finding.h"
 #include "Rotate.h"
-#include "states.h"
 
 Path_finding pf_fsm;
 Rotate r_fsm;
@@ -27,23 +26,20 @@ int main(void) {
   // kobuki. I don't understand why. -Haoyan
   init_kobuki();
   init_state_charts();
-
-  uint16_t width, height;
   pixy_init();
-  pixy_get_resolution(&width, &height);
+
   pixy_set_lamp(0, 0);
 
-  //uint8_t x0, y0, x1, y1;
-
   // loop forever, running state machine
-  uint32_t cycle_idx;
+  uint32_t cycle_idx = 0;
   while (1) {
     update_sensors();
-    printf("Running %d cycle\n", cycle_idx++);
+    if(cycle_idx++ % 10)
+      printf("Running %ld cycle\n", cycle_idx);
 
     // iterate statechart
     rotate_runCycle(&r_fsm);
-    // path_finding_runCycle(&pf_fsm);
+    path_finding_runCycle(&pf_fsm);
 
     // Delay before continuing
     // Note: removing this delay will make responses quicker

@@ -1,25 +1,17 @@
 #ifndef HELPER_FUNCS_H_
 #define HELPER_FUNCS_H_
 
-#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <math.h>
-#include "states.h"
 
 extern float normalize_rot(float x);
 
-extern float get_theta();
-
-extern void print_state(states current_state);
-extern void print_turn(turns current_turn);
-extern void print_dist(float dist);
-extern void print_angle(float angle);
+extern float get_line_tracking_theta();
 
 extern float update_dist(float dist, uint16_t prev_encoder, bool is_forward);
 
-float read_tilt_theta(void);
-float read_tilt_psi(void);
+extern float read_tilt_theta(void);
+extern float read_tilt_psi(void);
 
 extern float get_abs(float var);
 

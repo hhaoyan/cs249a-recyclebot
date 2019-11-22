@@ -412,8 +412,8 @@ static sc_boolean main_region_OFF_react(Path_finding* handle, const sc_boolean t
 	{ 
 		stop_kobuki();
 		handle->iface.button = is_button_press();
-		print_state(OFF);
-		print_angle(read_tilt_theta());
+		lcd_printf(0, "OFF");
+		lcd_printf(1, "Theta: %f", read_tilt_theta());
 	} 
 	return did_transition;
 }
@@ -445,8 +445,9 @@ static sc_boolean main_region_DRIVING_react(Path_finding* handle, const sc_boole
 	if ((did_transition) == (bool_false))
 	{ 
 		drive_kobuki(150, 150);
+		lcd_printf(0, "DRIVING");
 		handle->iface.button = is_button_press();
-		handle->iface.theta = get_theta();
+		handle->iface.theta = get_line_tracking_theta();
 	} 
 	return did_transition;
 }
@@ -471,8 +472,9 @@ static sc_boolean main_region_LEFT_react(Path_finding* handle, const sc_boolean 
 	if ((did_transition) == (bool_false))
 	{ 
 		drive_kobuki(100, 150);
+		lcd_printf(0, "TURN LEFT");
 		handle->iface.button = is_button_press();
-		handle->iface.theta = get_theta();
+		handle->iface.theta = get_line_tracking_theta();
 	} 
 	return did_transition;
 }
@@ -497,8 +499,9 @@ static sc_boolean main_region_RIGHT_react(Path_finding* handle, const sc_boolean
 	if ((did_transition) == (bool_false))
 	{ 
 		drive_kobuki(150, 100);
+		lcd_printf(0, "TURN RIGHT");
 		handle->iface.button = is_button_press();
-		handle->iface.theta = get_theta();
+		handle->iface.theta = get_line_tracking_theta();
 	} 
 	return did_transition;
 }
