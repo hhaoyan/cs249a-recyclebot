@@ -1,0 +1,11 @@
+GeneratorModel for yakindu::c {
+
+	statechart rotate {
+
+		feature Outlet {
+			targetProject = "recycle"
+			targetFolder = "src-gen"
+			libraryTargetFolder = "src"
+		}
+	}
+}

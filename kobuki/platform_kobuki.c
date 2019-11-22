@@ -4,6 +4,8 @@
 #include <app_error.h>
 #include <buckler.h>
 #include <display.h>
+#include <kobukiActuator.h>
+#include <kobukiSensorPoll.h>
 #include <kobukiUtilities.h>
 #include <mpu9250.h>
 #include <nrf.h>
@@ -21,6 +23,8 @@ NRF_TWI_MNGR_DEF(twi_mngr_instance, 5, 0);
 
 // LCD SPI instance
 static nrf_drv_spi_t spi_instance = NRF_DRV_SPI_INSTANCE(1);
+
+KobukiSensors_t sensors = {0};
 
 void init_kobuki() {
 	ret_code_t error_code = NRF_SUCCESS;
@@ -79,4 +83,60 @@ int lcd_printf(lcd_line_t line, const char* fmt,...) {
 
   display_write(buf, line);
   return ret;
+}
+
+bool is_button_press(){
+  return is_button_pressed(&sensors);
+}
+
+bool is_left_cliff(){
+  return sensors.cliffLeft;
+}
+
+bool is_center_cliff(){
+  return sensors.cliffCenter;
+}
+
+bool is_right_cliff(){
+  return sensors.cliffRight;
+}
+
+bool is_left_bumper(){
+  return sensors.bumps_wheelDrops.bumpLeft;
+}
+
+bool is_right_bumper(){
+  return sensors.bumps_wheelDrops.bumpRight;
+}
+
+bool is_center_bumper(){
+  return sensors.bumps_wheelDrops.bumpCenter;
+}
+
+void start_gyro(){
+  mpu9250_start_gyro_integration();
+}
+
+void stop_gyro(){
+  mpu9250_stop_gyro_integration();
+}
+
+float read_gyro(){
+  return mpu9250_read_gyro_integration().z_axis;
+}
+
+uint16_t read_encoder(){
+  return sensors.leftWheelEncoder;
+}
+
+void drive_kobuki(int16_t left_wheel, int16_t right_wheel){
+  kobukiDriveDirect(left_wheel, right_wheel);
+}
+
+void stop_kobuki(){
+  kobukiDriveDirect(0, 0);
+}
+
+void update_sensors() {
+  kobukiSensorPoll(&sensors);
 }

@@ -10,6 +10,7 @@ SOFTDEVICE_MODEL = s132
 APP_HEADER_PATHS += \
 	. \
 	../pixy-spi \
+	../buckler/software/libraries/kobuki/ \
 	./src-gen \
 	./kobuki \
 	./src
@@ -17,6 +18,7 @@ APP_HEADER_PATHS += \
 APP_SOURCE_PATHS += \
 	. \
 	../pixy-spi/ \
+	../buckler/software/libraries/kobuki/ \
 	./src-gen/ \
 	./kobuki/ \
 	./
@@ -32,9 +34,9 @@ APP_SOURCES += \
 	platform_bluetooth.c \
 	platform_kobuki.c\
 	main.c \
-	state.c \
+	Path_finding.c \
 	helper_funcs.c \
-	Robot_template.c \
+	Rotate.c \
 	pixy.c \
 	nrf_spi.c
 

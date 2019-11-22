@@ -1,8 +1,6 @@
 #include <math.h>
 #include <stddef.h>
 
-#include <kobukiActuator.h>
-#include <kobukiSensorPoll.h>
 #include <kobukiSensorTypes.h>
 #include <mpu9250.h>
 #include <nrf_delay.h>
@@ -11,7 +9,6 @@
 #include "platform_kobuki.h"
 #include "platform_bluetooth.h"
 
-KobukiSensors_t sensors = {0};
 static state_t state = Work;
 static float rotate = 0.0f;
 static float rot_diff = 0.0f;
@@ -80,7 +77,6 @@ static void callback(fsm_callback cb) {
 void fsm_loop(void) {
   state_t last = Tail;
   while (true) {
-    kobukiSensorPoll(&sensors);
     if (last != state) {
       callback(fsm[state].entry);
     }
