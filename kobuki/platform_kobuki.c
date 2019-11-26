@@ -43,6 +43,13 @@ void init_kobuki() {
   nrf_gpio_pin_dir_set(24, NRF_GPIO_PIN_DIR_OUTPUT);
   nrf_gpio_pin_dir_set(25, NRF_GPIO_PIN_DIR_OUTPUT);
 
+  // initialize ultrasonic sensor
+  // GPIO 3: ultrasonic trig
+  // GPIO 4: ultrasonic echo
+  nrf_gpio_pin_dir_set(3, NRF_GPIO_PIN_DIR_OUTPUT);
+  nrf_gpio_pin_dir_set(4, NRF_GPIO_PIN_DIR_INPUT);
+  nrf_gpio_pin_clear(3);
+
   // initialize display
   nrf_drv_spi_config_t spi_config = {
     .sck_pin = BUCKLER_LCD_SCLK,
@@ -145,4 +152,12 @@ void update_sensors() {
   pixy_line_detected = (0 == pixy_get_line_vector(
     &pixy_line_start[0], &pixy_line_start[1], 
     &pixy_line_end[0], &pixy_line_end[1]));
+}
+
+bool is_ultrasonic_full() {
+  nrf_gpio_pin_set(3);
+  nrf_delay_us(15);
+  nrf_gpio_pin_clear(3);
+  nrf_delay_us(1300);
+  return nrf_gpio_pin_read(4) > 0;
 }
