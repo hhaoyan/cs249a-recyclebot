@@ -9,6 +9,7 @@
 #include <kobukiUtilities.h>
 #include <mpu9250.h>
 #include <nrf.h>
+#include <nrf_delay.h>
 #include <nrf_drv_spi.h>
 #include <nrf_gpio.h>
 #include <nrf_log.h>
@@ -83,9 +84,12 @@ void init_kobuki() {
   printf("Kobuki initialized!\n");
 }
 
+static char buf[16];
+
 int lcd_printf(lcd_line_t line, const char* fmt,...) {
   va_list valist;
-  static char buf[16];
+
+  memset(buf, 0, 16);
 
   va_start(valist, fmt);
   int ret = vsprintf(buf, fmt, valist);
@@ -93,6 +97,12 @@ int lcd_printf(lcd_line_t line, const char* fmt,...) {
 
   display_write(buf, line);
   return ret;
+}
+
+void lcd_clear() {
+  memset(buf, 0, 16);
+  display_write(buf, 0);
+  display_write(buf, 1);
 }
 
 bool is_button_press(){

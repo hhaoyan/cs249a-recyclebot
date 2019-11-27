@@ -41,6 +41,7 @@ extern void stop_kobuki();
 
 extern int lcd_printf(lcd_line_t line, const char* fmt, ...)
 __attribute__ ((format (printf, 2, 3)));
+extern void lcd_clear();
 
 extern bool is_ultrasonic_full();
 
