@@ -1,6 +1,7 @@
 from google.cloud import vision
 import io
 from camera import CameraController
+from ble import BleController
 
 def get_labels(content):
     client = vision.ImageAnnotatorClient()
@@ -149,10 +150,11 @@ def get_classification(fine_grain_labels):
 
 if __name__ == '__main__':
     cam = CameraController()
+    # wait until the button is press to takes a picture
     content = cam.take_picture()
     google_cloud_labels = get_labels(content)
     fine_grain_labels = get_fine_grain_labels(google_cloud_labels)
     classification =  get_classification(fine_grain_labels)
     print('labels:', google_cloud_labels)
     print('classification:', classification)
-
+    # send an angle command to the buckler
