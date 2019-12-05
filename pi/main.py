@@ -2,6 +2,7 @@ from google.cloud import vision
 import io
 from camera import CameraController
 from ble import BleController
+import RPi.GPIO as GPIO
 
 def get_labels(content):
     client = vision.ImageAnnotatorClient()
@@ -148,13 +149,39 @@ def get_classification(fine_grain_labels):
 # location = '/Users/btl787/Google Drive/00-fa19/03-eecs-249a-embedded-systems/project/apple.jpg'
 # location = '/home/pi/Desktop/crumpled_napkin.jpg'
 
-if __name__ == '__main__':
-    cam = CameraController()
-    # wait until the button is press to takes a picture
+def send_angle(classification):
+    if classification == 'trash' or classification == 'unknown':
+        ble.setValue(0)
+    elif classification == 'recycling':
+        ble.setValue(1)
+    else:
+        ble.setValue(2)
+
+
+def take_picture_classify_on_cloud_send_rotate_signal():
     content = cam.take_picture()
     google_cloud_labels = get_labels(content)
     fine_grain_labels = get_fine_grain_labels(google_cloud_labels)
-    classification =  get_classification(fine_grain_labels)
+    classification = get_classification(fine_grain_labels)
     print('labels:', google_cloud_labels)
     print('classification:', classification)
+    send_angle(classification)
     # send an angle command to the buckler
+
+if __name__ == '__main__':
+    ble = BleController(3)
+    cam = CameraController()
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    while True:
+        # wait until the button is pressed
+        if GPIO.input(10) == GPIO.HIGH:
+            print("Button is pushed")
+            take_picture_classify_on_cloud_send_rotate_signal()
+
+
+
+
+
