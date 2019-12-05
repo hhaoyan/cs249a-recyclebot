@@ -40,6 +40,12 @@ void path_finding_init(Path_finding* handle)
 	clearOutEvents(handle);
 	
 	/* Default init sequence for statechart path_finding */
+	handle->iface.inv_Kp = 2;
+	handle->iface.inv_Kd = 1;
+	handle->iface.error = 0;
+	handle->iface.last_error = 0;
+	handle->iface.turn_speed = 0;
+	handle->iface.base_speed = 200;
 	handle->iface.speed_left = 0;
 	handle->iface.speed_right = 0;
 	handle->iface.has_vec = bool_false;
@@ -142,6 +148,54 @@ static void clearOutEvents(Path_finding* handle)
 
 
 
+int32_t path_findingIface_get_inv_Kp(const Path_finding* handle)
+{
+	return handle->iface.inv_Kp;
+}
+void path_findingIface_set_inv_Kp(Path_finding* handle, int32_t value)
+{
+	handle->iface.inv_Kp = value;
+}
+int32_t path_findingIface_get_inv_Kd(const Path_finding* handle)
+{
+	return handle->iface.inv_Kd;
+}
+void path_findingIface_set_inv_Kd(Path_finding* handle, int32_t value)
+{
+	handle->iface.inv_Kd = value;
+}
+int32_t path_findingIface_get_error(const Path_finding* handle)
+{
+	return handle->iface.error;
+}
+void path_findingIface_set_error(Path_finding* handle, int32_t value)
+{
+	handle->iface.error = value;
+}
+int32_t path_findingIface_get_last_error(const Path_finding* handle)
+{
+	return handle->iface.last_error;
+}
+void path_findingIface_set_last_error(Path_finding* handle, int32_t value)
+{
+	handle->iface.last_error = value;
+}
+int32_t path_findingIface_get_turn_speed(const Path_finding* handle)
+{
+	return handle->iface.turn_speed;
+}
+void path_findingIface_set_turn_speed(Path_finding* handle, int32_t value)
+{
+	handle->iface.turn_speed = value;
+}
+int16_t path_findingIface_get_base_speed(const Path_finding* handle)
+{
+	return handle->iface.base_speed;
+}
+void path_findingIface_set_base_speed(Path_finding* handle, int16_t value)
+{
+	handle->iface.base_speed = value;
+}
 int16_t path_findingIface_get_speed_left(const Path_finding* handle)
 {
 	return handle->iface.speed_left;
@@ -213,8 +267,8 @@ static void enact_main_region_Following(Path_finding* handle)
 {
 	/* Entry action for state 'Following'. */
 	lcd_printf(0, "FOLLOWING");
-	handle->iface.speed_left = 150;
-	handle->iface.speed_right = 150;
+	handle->iface.speed_left = handle->iface.base_speed;
+	handle->iface.speed_right = handle->iface.base_speed;
 }
 
 /* Exit action for state 'Following'. */
@@ -350,10 +404,11 @@ static sc_boolean main_region_Following_react(Path_finding* handle, const sc_boo
 		handle->iface.v_end_x = vec_end_x();
 		handle->iface.v_end_y = vec_end_y();
 		lcd_printf(0, "FOLLOWING %d %d", handle->iface.v_end_x, handle->iface.v_end_y);
-		handle->iface.speed_left = (((handle->iface.v_end_x) > (120)) && ((handle->iface.v_end_x) < (134))) ? 150 : handle->iface.speed_left;
-		handle->iface.speed_right = (((handle->iface.v_end_x) > (120)) && ((handle->iface.v_end_x) < (134))) ? 150 : handle->iface.speed_right;
-		handle->iface.speed_right += ((handle->iface.v_end_x) <= (120)) ? 3 : 0;
-		handle->iface.speed_left += ((handle->iface.v_end_x) >= (134)) ? 3 : 0;
+		handle->iface.error = ((handle->iface.v_end_x * 1000) - (127 * 1000));
+		handle->iface.turn_speed = ((handle->iface.error / handle->iface.inv_Kp) + (((handle->iface.error - handle->iface.last_error)) / handle->iface.inv_Kd));
+		handle->iface.last_error = handle->iface.error;
+		handle->iface.speed_left = (handle->iface.base_speed + (handle->iface.turn_speed / 1000));
+		handle->iface.speed_right = (handle->iface.base_speed - (handle->iface.turn_speed / 1000));
 		lcd_printf(1, "SPEED %d %d", handle->iface.speed_left, handle->iface.speed_right);
 		drive_kobuki(handle->iface.speed_left, handle->iface.speed_right);
 	} 

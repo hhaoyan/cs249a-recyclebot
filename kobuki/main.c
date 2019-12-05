@@ -5,9 +5,11 @@
 #include "platform_kobuki.h"
 #include "platform_bluetooth.h"
 #include "Path_finding.h"
+#include "Path_finding_2.h"
 #include "Rotate.h"
 
 Path_finding pf_fsm;
+Path_finding_2 pf_2_fsm;
 Rotate r_fsm;
 
 void init_state_charts() {
@@ -15,6 +17,8 @@ void init_state_charts() {
   // start statechart
   path_finding_init(&pf_fsm);
   path_finding_enter(&pf_fsm);
+  path_finding_2_init(&pf_2_fsm);
+  path_finding_2_enter(&pf_2_fsm);
   rotate_init(&r_fsm);
   rotate_enter(&r_fsm);
 }
@@ -41,6 +45,7 @@ int main(void) {
     // iterate statechart
     // rotate_runCycle(&r_fsm);
     path_finding_runCycle(&pf_fsm);
+    // path_finding_2_runCycle(&pf_2_fsm);
 
     // Delay before continuing
     // Note: removing this delay will make responses quicker

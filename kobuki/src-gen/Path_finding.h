@@ -42,6 +42,12 @@ typedef enum
 /*! Type definition of the data structure for the Path_findingIface interface scope. */
 typedef struct
 {
+	int32_t inv_Kp;
+	int32_t inv_Kd;
+	int32_t error;
+	int32_t last_error;
+	int32_t turn_speed;
+	int16_t base_speed;
 	int16_t speed_left;
 	int16_t speed_right;
 	sc_boolean has_vec;
@@ -81,6 +87,30 @@ extern void path_finding_exit(Path_finding* handle);
 extern void path_finding_runCycle(Path_finding* handle);
 
 
+/*! Gets the value of the variable 'inv_Kp' that is defined in the default interface scope. */ 
+extern int32_t path_findingIface_get_inv_Kp(const Path_finding* handle);
+/*! Sets the value of the variable 'inv_Kp' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_inv_Kp(Path_finding* handle, int32_t value);
+/*! Gets the value of the variable 'inv_Kd' that is defined in the default interface scope. */ 
+extern int32_t path_findingIface_get_inv_Kd(const Path_finding* handle);
+/*! Sets the value of the variable 'inv_Kd' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_inv_Kd(Path_finding* handle, int32_t value);
+/*! Gets the value of the variable 'error' that is defined in the default interface scope. */ 
+extern int32_t path_findingIface_get_error(const Path_finding* handle);
+/*! Sets the value of the variable 'error' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_error(Path_finding* handle, int32_t value);
+/*! Gets the value of the variable 'last_error' that is defined in the default interface scope. */ 
+extern int32_t path_findingIface_get_last_error(const Path_finding* handle);
+/*! Sets the value of the variable 'last_error' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_last_error(Path_finding* handle, int32_t value);
+/*! Gets the value of the variable 'turn_speed' that is defined in the default interface scope. */ 
+extern int32_t path_findingIface_get_turn_speed(const Path_finding* handle);
+/*! Sets the value of the variable 'turn_speed' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_turn_speed(Path_finding* handle, int32_t value);
+/*! Gets the value of the variable 'base_speed' that is defined in the default interface scope. */ 
+extern int16_t path_findingIface_get_base_speed(const Path_finding* handle);
+/*! Sets the value of the variable 'base_speed' that is defined in the default interface scope. */ 
+extern void path_findingIface_set_base_speed(Path_finding* handle, int16_t value);
 /*! Gets the value of the variable 'speed_left' that is defined in the default interface scope. */ 
 extern int16_t path_findingIface_get_speed_left(const Path_finding* handle);
 /*! Sets the value of the variable 'speed_left' that is defined in the default interface scope. */ 

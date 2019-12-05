@@ -35,6 +35,7 @@ APP_SOURCES += \
 	platform_kobuki.c\
 	main.c \
 	Path_finding.c \
+	Path_finding_2.c \
 	helper_funcs.c \
 	Rotate.c \
 	pixy.c \
