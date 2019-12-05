@@ -213,8 +213,8 @@ static void enact_main_region_Following(Path_finding* handle)
 {
 	/* Entry action for state 'Following'. */
 	lcd_printf(0, "FOLLOWING");
-	handle->iface.speed_left = 50;
-	handle->iface.speed_right = 50;
+	handle->iface.speed_left = 150;
+	handle->iface.speed_right = 150;
 }
 
 /* Exit action for state 'Following'. */
@@ -350,10 +350,10 @@ static sc_boolean main_region_Following_react(Path_finding* handle, const sc_boo
 		handle->iface.v_end_x = vec_end_x();
 		handle->iface.v_end_y = vec_end_y();
 		lcd_printf(0, "FOLLOWING %d %d", handle->iface.v_end_x, handle->iface.v_end_y);
-		handle->iface.speed_left = (((handle->iface.v_end_x) > (120)) && ((handle->iface.v_end_x) < (134))) ? 50 : handle->iface.speed_left;
-		handle->iface.speed_right = (((handle->iface.v_end_x) > (120)) && ((handle->iface.v_end_x) < (134))) ? 50 : handle->iface.speed_right;
-		handle->iface.speed_right += ((handle->iface.v_end_x) <= (120)) ? 1 : 0;
-		handle->iface.speed_left += ((handle->iface.v_end_x) >= (134)) ? 1 : 0;
+		handle->iface.speed_left = (((handle->iface.v_end_x) > (120)) && ((handle->iface.v_end_x) < (134))) ? 150 : handle->iface.speed_left;
+		handle->iface.speed_right = (((handle->iface.v_end_x) > (120)) && ((handle->iface.v_end_x) < (134))) ? 150 : handle->iface.speed_right;
+		handle->iface.speed_right += ((handle->iface.v_end_x) <= (120)) ? 3 : 0;
+		handle->iface.speed_left += ((handle->iface.v_end_x) >= (134)) ? 3 : 0;
 		lcd_printf(1, "SPEED %d %d", handle->iface.speed_left, handle->iface.speed_right);
 		drive_kobuki(handle->iface.speed_left, handle->iface.speed_right);
 	} 

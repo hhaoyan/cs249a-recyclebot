@@ -8,7 +8,7 @@
       <vertices xsi:type="sgraph:State" xmi:id="_MvdBIMFBEeipM4DyHdzJFg" specification="entry/&#xA;lcd_printf(0, &quot;NO LINE&quot;)&#xA;&#xA;always/&#xA;stop_kobuki();&#xA;has_vec = is_vec_detected()&#xA;" name="Station" incomingTransitions="_MvfdYcFBEeipM4DyHdzJFg _NonusA1SEeq4G6e_M-liSA">
         <outgoingTransitions xmi:id="_bXGVkAmcEeqvKYZWclgKrg" specification="[has_vec]" target="_nekc8OlLEemxdcBz6DnlMw"/>
       </vertices>
-      <vertices xsi:type="sgraph:State" xmi:id="_nekc8OlLEemxdcBz6DnlMw" specification="entry/&#xA;lcd_printf(0, &quot;FOLLOWING&quot;);&#xA;speed_left = 50;&#xA;speed_right = 50&#xA;&#xA;always/&#xA;has_vec = is_vec_detected();&#xA;v_start_x = vec_start_x();&#xA;v_start_y = vec_start_y();&#xA;v_end_x = vec_end_x();&#xA;v_end_y = vec_end_y();&#xA;lcd_printf(0, &quot;FOLLOWING %d %d&quot;, v_end_x, v_end_y);&#xA;speed_left = (v_end_x > 120 &amp;&amp; v_end_x &lt; 134) ? 50 : speed_left;&#xA;speed_right = (v_end_x > 120 &amp;&amp; v_end_x &lt; 134) ? 50 : speed_right;&#xA;speed_right += (v_end_x &lt;= 120) ? 1 : 0;&#xA;speed_left += (v_end_x >= 134) ? 1 : 0;&#xA;lcd_printf(1, &quot;SPEED %d %d&quot;, speed_left, speed_right);&#xA;drive_kobuki(speed_left, speed_right)&#xA;&#xA;exit/&#xA;lcd_printf(1, &quot;           &quot;);&#xA;stop_kobuki()" name="Following" incomingTransitions="_bXGVkAmcEeqvKYZWclgKrg">
+      <vertices xsi:type="sgraph:State" xmi:id="_nekc8OlLEemxdcBz6DnlMw" specification="entry/&#xA;lcd_printf(0, &quot;FOLLOWING&quot;);&#xA;speed_left = 150;&#xA;speed_right = 150&#xA;&#xA;always/&#xA;has_vec = is_vec_detected();&#xA;v_start_x = vec_start_x();&#xA;v_start_y = vec_start_y();&#xA;v_end_x = vec_end_x();&#xA;v_end_y = vec_end_y();&#xA;lcd_printf(0, &quot;FOLLOWING %d %d&quot;, v_end_x, v_end_y);&#xA;speed_left = (v_end_x > 120 &amp;&amp; v_end_x &lt; 134) ? 150 : speed_left;&#xA;speed_right = (v_end_x > 120 &amp;&amp; v_end_x &lt; 134) ? 150 : speed_right;&#xA;speed_right += (v_end_x &lt;= 120) ? 3 : 0;&#xA;speed_left += (v_end_x >= 134) ? 3 : 0;&#xA;lcd_printf(1, &quot;SPEED %d %d&quot;, speed_left, speed_right);&#xA;drive_kobuki(speed_left, speed_right)&#xA;&#xA;exit/&#xA;lcd_printf(1, &quot;           &quot;);&#xA;stop_kobuki()" name="Following" incomingTransitions="_bXGVkAmcEeqvKYZWclgKrg">
         <outgoingTransitions xmi:id="_NonusA1SEeq4G6e_M-liSA" specification="[!has_vec]" target="_MvdBIMFBEeipM4DyHdzJFg"/>
       </vertices>
     </regions>
@@ -63,7 +63,7 @@
           <styles xsi:type="notation:ShapeStyle" xmi:id="_nejO2OlLEemxdcBz6DnlMw" fontName="Verdana" fillColor="15981773" lineColor="12632256"/>
           <styles xsi:type="notation:FontStyle" xmi:id="_nejO2elLEemxdcBz6DnlMw"/>
           <styles xsi:type="notation:BooleanValueStyle" xmi:id="_nejO2ulLEemxdcBz6DnlMw" name="isHorizontal" booleanValue="true"/>
-          <layoutConstraint xsi:type="notation:Bounds" xmi:id="_nejO2-lLEemxdcBz6DnlMw" x="417" y="57" width="360" height="278"/>
+          <layoutConstraint xsi:type="notation:Bounds" xmi:id="_nejO2-lLEemxdcBz6DnlMw" x="417" y="57" width="365" height="275"/>
         </children>
         <layoutConstraint xsi:type="notation:Bounds" xmi:id="_Mvak48FBEeipM4DyHdzJFg"/>
       </children>
@@ -102,7 +102,7 @@
       <styles xsi:type="notation:FontStyle" xmi:id="_bXKnAAmcEeqvKYZWclgKrg" fontName="Verdana"/>
       <bendpoints xsi:type="notation:RelativeBendpoints" xmi:id="_bXJ_8gmcEeqvKYZWclgKrg" points="[7, 1, -132, 1]$[140, -41, 1, -41]"/>
       <sourceAnchor xsi:type="notation:IdentityAnchor" xmi:id="_bXO4cAmcEeqvKYZWclgKrg" id="(0.9655172413793104,0.46938775510204084)"/>
-      <targetAnchor xsi:type="notation:IdentityAnchor" xmi:id="_bXO4cQmcEeqvKYZWclgKrg" id="(0.052679599610240053,0.1507444168734491)"/>
+      <targetAnchor xsi:type="notation:IdentityAnchor" xmi:id="_bXO4cQmcEeqvKYZWclgKrg" id="(0.051947938504542275,0.15241935483870966)"/>
     </edges>
     <edges xmi:id="_NorZEA1SEeq4G6e_M-liSA" type="Transition" element="_NonusA1SEeq4G6e_M-liSA" source="_nejO0OlLEemxdcBz6DnlMw" target="_MvdoMMFBEeipM4DyHdzJFg">
       <children xsi:type="notation:DecorationNode" xmi:id="_NosnMA1SEeq4G6e_M-liSA" type="TransitionExpression">
@@ -112,7 +112,7 @@
       <styles xsi:type="notation:ConnectorStyle" xmi:id="_NorZEQ1SEeq4G6e_M-liSA" routing="Rectilinear" lineColor="4210752"/>
       <styles xsi:type="notation:FontStyle" xmi:id="_NosAIA1SEeq4G6e_M-liSA" fontName="Verdana"/>
       <bendpoints xsi:type="notation:RelativeBendpoints" xmi:id="_NorZEg1SEeq4G6e_M-liSA" points="[0, -2, 163, 4]$[-158, 26, 5, 32]"/>
-      <sourceAnchor xsi:type="notation:IdentityAnchor" xmi:id="_NovqgA1SEeq4G6e_M-liSA" id="(0.0,0.2871322226160936)"/>
+      <sourceAnchor xsi:type="notation:IdentityAnchor" xmi:id="_NovqgA1SEeq4G6e_M-liSA" id="(0.0,0.2903225806451613)"/>
       <targetAnchor xsi:type="notation:IdentityAnchor" xmi:id="_NovqgQ1SEeq4G6e_M-liSA" id="(0.9627329192546584,0.6972477064220184)"/>
     </edges>
   </notation:Diagram>
