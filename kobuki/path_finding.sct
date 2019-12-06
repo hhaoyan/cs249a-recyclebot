@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:sgraph="http://www.yakindu.org/sct/sgraph/2.0.0">
-  <sgraph:Statechart xmi:id="_MvNJgMFBEeipM4DyHdzJFg" specification="@CycleBased(200)&#xA;import:&quot;platform_kobuki.h&quot;&#xA;import:&quot;platform_bluetooth.h&quot;&#xA;import:&quot;helper_funcs.h&quot;&#xA;&#xA;interface:&#xA;// Define events and&#xA;// and variables here. &#xA;//Use CTRL + Space for content assist.&#xA;&#xA;var inv_Kp:int32_t = 2&#xA;var inv_Kd:int32_t = 1&#xA;var error:int32_t = 0&#xA;var last_error:int32_t = 0&#xA;var turn_speed:int32_t = 0&#xA;&#xA;var base_speed:int16_t = 200&#xA;&#xA;var speed_left:int16_t = 0&#xA;var speed_right:int16_t = 0&#xA;&#xA;// Line tracking&#xA;var has_vec:bool=false&#xA;var v_start_x:uint8_t = 0&#xA;var v_start_y:uint8_t = 0&#xA;var v_end_x:uint8_t = 0&#xA;var v_end_y:uint8_t = 0" name="path_finding" domainID="com.yakindu.domain.c">
+  <sgraph:Statechart xmi:id="_MvNJgMFBEeipM4DyHdzJFg" specification="@CycleBased(200)&#xA;import:&quot;platform_kobuki.h&quot;&#xA;import:&quot;platform_bluetooth.h&quot;&#xA;import:&quot;helper_funcs.h&quot;&#xA;&#xA;interface:&#xA;// Define events and&#xA;// and variables here. &#xA;//Use CTRL + Space for content assist.&#xA;&#xA;var inv_Kp:int32_t = 2&#xA;var inv_Kd:int32_t = 1&#xA;var error:int32_t = 0&#xA;var last_error:int32_t = 0&#xA;var turn_speed:int32_t = 0&#xA;&#xA;var base_speed:int16_t = 400&#xA;&#xA;var speed_left:int16_t = 0&#xA;var speed_right:int16_t = 0&#xA;&#xA;// Line tracking&#xA;var has_vec:bool=false&#xA;var v_start_x:uint8_t = 0&#xA;var v_start_y:uint8_t = 0&#xA;var v_end_x:uint8_t = 0&#xA;var v_end_y:uint8_t = 0" name="path_finding" domainID="com.yakindu.domain.c">
     <regions xmi:id="_MvRa88FBEeipM4DyHdzJFg" name="main region">
       <vertices xsi:type="sgraph:Entry" xmi:id="_MvbL8cFBEeipM4DyHdzJFg">
         <outgoingTransitions xmi:id="_MvfdYcFBEeipM4DyHdzJFg" target="_MvdBIMFBEeipM4DyHdzJFg"/>
@@ -8,7 +8,7 @@
       <vertices xsi:type="sgraph:State" xmi:id="_MvdBIMFBEeipM4DyHdzJFg" specification="entry/&#xA;lcd_printf(0, &quot;NO LINE&quot;)&#xA;&#xA;always/&#xA;stop_kobuki();&#xA;has_vec = is_vec_detected()&#xA;" name="Station" incomingTransitions="_MvfdYcFBEeipM4DyHdzJFg _NonusA1SEeq4G6e_M-liSA">
         <outgoingTransitions xmi:id="_bXGVkAmcEeqvKYZWclgKrg" specification="[has_vec]" target="_nekc8OlLEemxdcBz6DnlMw"/>
       </vertices>
-      <vertices xsi:type="sgraph:State" xmi:id="_nekc8OlLEemxdcBz6DnlMw" specification="entry/&#xA;lcd_printf(0, &quot;FOLLOWING&quot;);&#xA;speed_left = base_speed;&#xA;speed_right = base_speed&#xA;&#xA;always/&#xA;has_vec = is_vec_detected();&#xA;v_start_x = vec_start_x();&#xA;v_start_y = vec_start_y();&#xA;v_end_x = vec_end_x();&#xA;v_end_y = vec_end_y();&#xA;lcd_printf(0, &quot;FOLLOWING %d %d&quot;, v_end_x, v_end_y);&#xA;&#xA;error = v_end_x*1000 - 127*1000;&#xA;turn_speed = error / inv_Kp + (error - last_error) / inv_Kd;&#xA;last_error = error;&#xA;&#xA;speed_left = base_speed + turn_speed / 1000;&#xA;speed_right = base_speed - turn_speed / 1000;&#xA;lcd_printf(1, &quot;SPEED %d %d&quot;, speed_left, speed_right);&#xA;drive_kobuki(speed_left, speed_right)&#xA;&#xA;exit/&#xA;lcd_printf(1, &quot;           &quot;);&#xA;stop_kobuki()" name="Following" incomingTransitions="_bXGVkAmcEeqvKYZWclgKrg">
+      <vertices xsi:type="sgraph:State" xmi:id="_nekc8OlLEemxdcBz6DnlMw" specification="entry/&#xA;lcd_printf(0, &quot;FOLLOWING&quot;);&#xA;speed_left = base_speed;&#xA;speed_right = base_speed&#xA;&#xA;always/&#xA;has_vec = is_vec_detected();&#xA;v_start_x = vec_start_x();&#xA;v_start_y = vec_start_y();&#xA;v_end_x = vec_end_x();&#xA;v_end_y = vec_end_y();&#xA;lcd_printf(0, &quot;FOLLOWING %d %d&quot;, v_end_x, v_end_y);&#xA;&#xA;error = v_end_x*1000 - 127*1000;&#xA;turn_speed = turn_speed * 400 / 1000 + (error / inv_Kp + (error - last_error) / inv_Kd) * 600 / 1000;&#xA;last_error = error;&#xA;&#xA;speed_left = base_speed + turn_speed / 1000;&#xA;speed_right = base_speed - turn_speed / 1000;&#xA;lcd_printf(1, &quot;SPEED %d %d&quot;, speed_left, speed_right);&#xA;drive_kobuki(speed_left, speed_right)&#xA;&#xA;exit/&#xA;lcd_printf(1, &quot;           &quot;);&#xA;stop_kobuki()" name="Following" incomingTransitions="_bXGVkAmcEeqvKYZWclgKrg">
         <outgoingTransitions xmi:id="_NonusA1SEeq4G6e_M-liSA" specification="[!has_vec]" target="_MvdBIMFBEeipM4DyHdzJFg"/>
       </vertices>
     </regions>
@@ -63,7 +63,7 @@
           <styles xsi:type="notation:ShapeStyle" xmi:id="_nejO2OlLEemxdcBz6DnlMw" fontName="Verdana" fillColor="15981773" lineColor="12632256"/>
           <styles xsi:type="notation:FontStyle" xmi:id="_nejO2elLEemxdcBz6DnlMw"/>
           <styles xsi:type="notation:BooleanValueStyle" xmi:id="_nejO2ulLEemxdcBz6DnlMw" name="isHorizontal" booleanValue="true"/>
-          <layoutConstraint xsi:type="notation:Bounds" xmi:id="_nejO2-lLEemxdcBz6DnlMw" x="417" y="57" width="303" height="314"/>
+          <layoutConstraint xsi:type="notation:Bounds" xmi:id="_nejO2-lLEemxdcBz6DnlMw" x="417" y="57" width="505" height="323"/>
         </children>
         <layoutConstraint xsi:type="notation:Bounds" xmi:id="_Mvak48FBEeipM4DyHdzJFg"/>
       </children>
@@ -102,7 +102,7 @@
       <styles xsi:type="notation:FontStyle" xmi:id="_bXKnAAmcEeqvKYZWclgKrg" fontName="Verdana"/>
       <bendpoints xsi:type="notation:RelativeBendpoints" xmi:id="_bXJ_8gmcEeqvKYZWclgKrg" points="[7, 1, -132, 1]$[140, -41, 1, -41]"/>
       <sourceAnchor xsi:type="notation:IdentityAnchor" xmi:id="_bXO4cAmcEeqvKYZWclgKrg" id="(0.9655172413793104,0.46938775510204084)"/>
-      <targetAnchor xsi:type="notation:IdentityAnchor" xmi:id="_bXO4cQmcEeqvKYZWclgKrg" id="(0.0032978477204350844,0.14326692724750975)"/>
+      <targetAnchor xsi:type="notation:IdentityAnchor" xmi:id="_bXO4cQmcEeqvKYZWclgKrg" id="(0.00196551724137931,0.13921220289144814)"/>
     </edges>
     <edges xmi:id="_NorZEA1SEeq4G6e_M-liSA" type="Transition" element="_NonusA1SEeq4G6e_M-liSA" source="_nejO0OlLEemxdcBz6DnlMw" target="_MvdoMMFBEeipM4DyHdzJFg">
       <children xsi:type="notation:DecorationNode" xmi:id="_NosnMA1SEeq4G6e_M-liSA" type="TransitionExpression">
@@ -112,7 +112,7 @@
       <styles xsi:type="notation:ConnectorStyle" xmi:id="_NorZEQ1SEeq4G6e_M-liSA" routing="Rectilinear" lineColor="4210752"/>
       <styles xsi:type="notation:FontStyle" xmi:id="_NosAIA1SEeq4G6e_M-liSA" fontName="Verdana"/>
       <bendpoints xsi:type="notation:RelativeBendpoints" xmi:id="_NorZEg1SEeq4G6e_M-liSA" points="[0, -2, 163, 4]$[-158, 26, 5, 32]"/>
-      <sourceAnchor xsi:type="notation:IdentityAnchor" xmi:id="_NovqgA1SEeq4G6e_M-liSA" id="(0.0,0.2536799248355779)"/>
+      <sourceAnchor xsi:type="notation:IdentityAnchor" xmi:id="_NovqgA1SEeq4G6e_M-liSA" id="(0.0,0.2465003043213634)"/>
       <targetAnchor xsi:type="notation:IdentityAnchor" xmi:id="_NovqgQ1SEeq4G6e_M-liSA" id="(0.9627329192546584,0.7064220183486238)"/>
     </edges>
   </notation:Diagram>

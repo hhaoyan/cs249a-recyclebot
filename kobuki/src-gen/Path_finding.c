@@ -45,7 +45,7 @@ void path_finding_init(Path_finding* handle)
 	handle->iface.error = 0;
 	handle->iface.last_error = 0;
 	handle->iface.turn_speed = 0;
-	handle->iface.base_speed = 200;
+	handle->iface.base_speed = 400;
 	handle->iface.speed_left = 0;
 	handle->iface.speed_right = 0;
 	handle->iface.has_vec = bool_false;
@@ -405,7 +405,7 @@ static sc_boolean main_region_Following_react(Path_finding* handle, const sc_boo
 		handle->iface.v_end_y = vec_end_y();
 		lcd_printf(0, "FOLLOWING %d %d", handle->iface.v_end_x, handle->iface.v_end_y);
 		handle->iface.error = ((handle->iface.v_end_x * 1000) - (127 * 1000));
-		handle->iface.turn_speed = ((handle->iface.error / handle->iface.inv_Kp) + (((handle->iface.error - handle->iface.last_error)) / handle->iface.inv_Kd));
+		handle->iface.turn_speed = (((handle->iface.turn_speed * 400) / 1000) + (((((handle->iface.error / handle->iface.inv_Kp) + (((handle->iface.error - handle->iface.last_error)) / handle->iface.inv_Kd))) * 600) / 1000));
 		handle->iface.last_error = handle->iface.error;
 		handle->iface.speed_left = (handle->iface.base_speed + (handle->iface.turn_speed / 1000));
 		handle->iface.speed_right = (handle->iface.base_speed - (handle->iface.turn_speed / 1000));
