@@ -3,6 +3,7 @@ import io
 from camera import CameraController
 from ble import BleController
 import RPi.GPIO as GPIO
+import time
 
 def get_labels(content):
     client = vision.ImageAnnotatorClient()
@@ -168,20 +169,34 @@ def take_picture_classify_on_cloud_send_rotate_signal():
     send_angle(classification)
     # send an angle command to the buckler
 
-if __name__ == '__main__':
-    # ble = BleController(3)
-    cam = CameraController()
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    print("setup complete")
-    while True:
-        # wait until the button is pressed
-        if GPIO.input(10) == GPIO.HIGH:
-            print("Button is pushed")
+count = 0
+last_time = int(time.time())
+
+def button_callback(channel):
+    global count
+    global last_time
+    
+    cur_time = int(time.time())
+    if (cur_time - last_time) > 1:
+        last_time = cur_time
+        print("Button is pushed count is", count)
+        ble.setValue(count)
+        count += 1
+        if count == 3:
+            count = 0
             # take_picture_classify_on_cloud_send_rotate_signal()
 
 
 
+if __name__ == '__main__':
+    ble = BleController(3)
+    cam = CameraController()
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.add_event_detect(10, GPIO.RISING, callback=button_callback)
+    print("setup complete")
 
+    message = input("Press enter to quit\n\n")
+    GPIO.cleanup()
 
