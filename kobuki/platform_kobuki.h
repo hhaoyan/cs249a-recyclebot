@@ -44,5 +44,8 @@ __attribute__ ((format (printf, 2, 3)));
 extern void lcd_clear();
 
 extern bool is_ultrasonic_full();
+extern void update_ultrasonic();
+extern bool is_full();
+extern void clear_full();
 
 #endif

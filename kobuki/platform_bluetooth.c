@@ -48,3 +48,10 @@ void init_bluetooth() {
 float get_rotate() {
   return rot;
 }
+
+void set_available(bool avl) {
+  available = avl;
+  if (!avl) {
+    rot = 0;
+  }
+}
