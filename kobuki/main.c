@@ -16,12 +16,14 @@ void init_state_charts() {
   // initialize yakindu state machine
   // start statechart
   path_finding_init(&pf_fsm);
-  path_finding_enter(&pf_fsm);
+  // path_finding_enter(&pf_fsm);
   path_finding_2_init(&pf_2_fsm);
-  path_finding_2_enter(&pf_2_fsm);
+  // path_finding_2_enter(&pf_2_fsm);
   rotate_init(&r_fsm);
   rotate_enter(&r_fsm);
 }
+
+
 
 int main(void) {
   // intialize platform
@@ -39,13 +41,27 @@ int main(void) {
   uint32_t cycle_idx = 0;
   while (1) {
     update_sensors();
-    if(cycle_idx++ % 10 == 0)
-      printf("Running %ld cycle\n", cycle_idx);
+    // if(cycle_idx++ % 10 == 0)
+    //   printf("Running %ld cycle\n", cycle_idx);
+    cycle_idx++;
 
-    // iterate statechart
-    // rotate_runCycle(&r_fsm);
-    path_finding_runCycle(&pf_fsm);
-    // path_finding_2_runCycle(&pf_2_fsm);
+    if (false) {
+      set_available(false);
+      if (rotate_isActive(&r_fsm)) {
+        rotate_runCycle(&r_fsm);
+        if (rotate_isStateActive(&r_fsm, Rotate_main_region_Rest)) {
+          rotate_exit(&r_fsm);
+          // transit to the path finding
+          lcd_printf(0, "bin is full");
+          // TODO
+        }
+      }
+    } else {
+      rotate_runCycle(&r_fsm);
+      if (cycle_idx % 10 == 0 && rotate_isStateActive(&r_fsm, Rotate_main_region_Rest)) {
+        update_ultrasonic();
+      }
+    }
 
     // Delay before continuing
     // Note: removing this delay will make responses quicker

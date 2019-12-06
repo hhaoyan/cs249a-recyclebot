@@ -29,6 +29,8 @@ static nrf_drv_spi_t spi_instance = NRF_DRV_SPI_INSTANCE(1);
 KobukiSensors_t sensors = {0};
 bool pixy_line_detected = false;
 uint8_t pixy_line_start[2], pixy_line_end[2];
+static bool full = false;
+static int full_time = 0;
 
 void init_kobuki() {
 	ret_code_t error_code = NRF_SUCCESS;
@@ -159,15 +161,39 @@ void stop_kobuki(){
 
 void update_sensors() {
   kobukiSensorPoll(&sensors);
-  pixy_line_detected = (0 == pixy_get_line_vector(
-    &pixy_line_start[0], &pixy_line_start[1], 
-    &pixy_line_end[0], &pixy_line_end[1]));
+  // pixy_line_detected = (0 == pixy_get_line_vector(
+  //   &pixy_line_start[0], &pixy_line_start[1], 
+  //   &pixy_line_end[0], &pixy_line_end[1]));
 }
 
 bool is_ultrasonic_full() {
   nrf_gpio_pin_set(3);
   nrf_delay_us(15);
   nrf_gpio_pin_clear(3);
-  nrf_delay_us(1300);
+  // change this for sensitivity
+  nrf_delay_us(1100);
   return nrf_gpio_pin_read(4) > 0;
+}
+
+void update_ultrasonic() {
+  if (full) return;
+  bool is_full = is_ultrasonic_full();
+  if (is_full) {
+    full_time++;
+    printf("%d\n", full_time);
+    // only detect full when ultrasonic sensor detects full 5 more times
+    if (full_time > 5) {
+      full = true;
+    }
+  } else {
+    full_time = 0;
+  }
+}
+
+bool is_full() {
+  return full;
+}
+
+void clear_full() {
+  full = false;
 }

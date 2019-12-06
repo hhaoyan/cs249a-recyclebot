@@ -81,7 +81,7 @@ int main(void) {
   APP_ERROR_CHECK(error_code);
   display_init(&spi_instance);
   printf("Display initialized!\n");
-  lcd_printf(LCD_LINE_0, "Hello RecycleBot!");
+  lcd_printf(LCD_LINE_0, "Hello");
 
   init_ultrasonic();
   detect_ultrasonic();
