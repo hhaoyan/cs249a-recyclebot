@@ -169,17 +169,17 @@ def take_picture_classify_on_cloud_send_rotate_signal():
     # send an angle command to the buckler
 
 if __name__ == '__main__':
-    ble = BleController(3)
+    # ble = BleController(3)
     cam = CameraController()
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
+    print("setup complete")
     while True:
         # wait until the button is pressed
         if GPIO.input(10) == GPIO.HIGH:
             print("Button is pushed")
-            take_picture_classify_on_cloud_send_rotate_signal()
+            # take_picture_classify_on_cloud_send_rotate_signal()
 
 
 
