@@ -16,9 +16,9 @@ void init_state_charts() {
   // initialize yakindu state machine
   // start statechart
   path_finding_init(&pf_fsm);
-  path_finding_enter(&pf_fsm);
+  // path_finding_enter(&pf_fsm);
   path_finding_2_init(&pf_2_fsm);
-  path_finding_2_enter(&pf_2_fsm);
+  // path_finding_2_enter(&pf_2_fsm);
   rotate_init(&r_fsm);
   rotate_enter(&r_fsm);
 }
@@ -41,10 +41,10 @@ int main(void) {
     update_sensors();
     // if(cycle_idx++ % 10 == 0)
     //   printf("Running %ld cycle\n", cycle_idx);
-    cycle_idx++;
-    if (cycle_idx % 100 == 0 && rotate_isStateActive(&r_fsm, Rotate_main_region_Rest)) {
-      lcd_printf(1, "full: %d", is_ultrasonic_full);
-    }
+    // cycle_idx++;
+    // if (cycle_idx % 100 == 0 && rotate_isStateActive(&r_fsm, Rotate_main_region_Rest)) {
+    //   lcd_printf(1, "full: %d", is_ultrasonic_full());
+    // }
 
     // iterate statechart
     rotate_runCycle(&r_fsm);
