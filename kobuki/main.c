@@ -39,12 +39,16 @@ int main(void) {
   uint32_t cycle_idx = 0;
   while (1) {
     update_sensors();
-    if(cycle_idx++ % 10 == 0)
-      printf("Running %ld cycle\n", cycle_idx);
+    // if(cycle_idx++ % 10 == 0)
+    //   printf("Running %ld cycle\n", cycle_idx);
+    cycle_idx++;
+    if (cycle_idx % 100 == 0 && rotate_isStateActive(&r_fsm, Rotate_main_region_Rest)) {
+      lcd_printf(1, "full: %d", is_ultrasonic_full);
+    }
 
     // iterate statechart
-    // rotate_runCycle(&r_fsm);
-    path_finding_runCycle(&pf_fsm);
+    rotate_runCycle(&r_fsm);
+    // path_finding_runCycle(&pf_fsm);
     // path_finding_2_runCycle(&pf_2_fsm);
 
     // Delay before continuing

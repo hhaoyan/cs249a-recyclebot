@@ -24,7 +24,9 @@ static simple_ble_service_t robot_service = {{
 }};
 
 static int rot = 0;
+static bool available = true;
 static simple_ble_char_t rot_state_char = {.uuid16 = 0x108a};
+static simple_ble_char_t avl_state_char = {.uuid16 = 0x108b};
 static simple_ble_app_t* simple_ble_app;
 
 void init_bluetooth() {
@@ -35,6 +37,9 @@ void init_bluetooth() {
   simple_ble_add_characteristic(1, 1, 0, 0,
       sizeof(rot), (uint8_t*)&rot,
       &robot_service, &rot_state_char);
+  simple_ble_add_characteristic(1, 1, 0, 0,
+      sizeof(available), (uint8_t*)&available,
+      &robot_service, &avl_state_char);
 
   // Start Advertising
   simple_ble_adv_only_name();

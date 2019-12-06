@@ -193,7 +193,7 @@ static void enact_main_region_Rotating_Left(Rotate* handle)
 {
 	/* Entry action for state 'Rotating_Left'. */
 	lcd_printf(0, "Rotating_Left");
-	lcd_printf(0, "Rot left: %f", handle->iface.rotation_diff);
+	lcd_printf(1, "Rot left: %f", handle->iface.rotation_diff);
 	start_gyro();
 	stop_kobuki();
 }
@@ -203,7 +203,7 @@ static void enact_main_region_Rotating_Right(Rotate* handle)
 {
 	/* Entry action for state 'Rotating_Right'. */
 	lcd_printf(0, "Rotating_Right");
-	lcd_printf(0, "Rot right: %f", handle->iface.rotation_diff);
+	lcd_printf(1, "Rot right: %f", handle->iface.rotation_diff);
 	start_gyro();
 	stop_kobuki();
 }
