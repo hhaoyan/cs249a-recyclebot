@@ -9,6 +9,7 @@ def get_labels(content):
     client = vision.ImageAnnotatorClient()
 
     image = vision.types.Image(content=content)
+    print("Connected to Google Cloud")
 
     response = client.label_detection(image=image)
     labels = response.label_annotations
@@ -160,36 +161,37 @@ def send_angle(classification):
 
 
 def take_picture_classify_on_cloud_send_rotate_signal():
+    print("button pressed, sending photo to Google Cloud")
     content = cam.take_picture()
     google_cloud_labels = get_labels(content)
     fine_grain_labels = get_fine_grain_labels(google_cloud_labels)
     classification = get_classification(fine_grain_labels)
     print('labels:', google_cloud_labels)
     print('classification:', classification)
-    send_angle(classification)
+    # send_angle(classification)
     # send an angle command to the buckler
 
 count = 0
 last_time = int(time.time())
 
-def button_callback(channel):
+def go_through_states():
     global count
+    print("Button is pushed count is", count)
+    ble.setValue(count)
+    count += 1
+    if count == 3:
+        count = 0
+
+def button_callback(channel):
     global last_time
-    
     cur_time = int(time.time())
     if (cur_time - last_time) > 1:
-        last_time = cur_time
-        print("Button is pushed count is", count)
-        ble.setValue(count)
-        count += 1
-        if count == 3:
-            count = 0
-            # take_picture_classify_on_cloud_send_rotate_signal()
-
-
+        # print("button pressed")
+        take_picture_classify_on_cloud_send_rotate_signal()
+        last_time = int(time.time())
 
 if __name__ == '__main__':
-    ble = BleController(3)
+    # ble = BleController(3)
     cam = CameraController()
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)

@@ -1,6 +1,6 @@
 # How to Run
 1. Set up the Google Cloud Key
-2. `python3 main.py`
+2. `sudo -E python3 main.py`
 3. On Raspberry Pi, green wire is the bottom, inner pin. On blue wire, 5th pin on the outside
 4. Be Depresso, Nothing works
 5. Bam. Trash Sorted.
