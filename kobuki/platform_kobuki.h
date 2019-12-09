@@ -45,7 +45,7 @@ extern void lcd_clear();
 
 extern bool is_ultrasonic_full();
 extern void update_ultrasonic();
-extern bool is_full();
-extern void clear_full();
+extern bool is_bin_full();
+extern void clear_bin_full();
 
 #endif

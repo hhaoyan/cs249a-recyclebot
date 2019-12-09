@@ -30,8 +30,9 @@ static nrf_drv_spi_t spi_instance = NRF_DRV_SPI_INSTANCE(1);
 KobukiSensors_t sensors = {0};
 bool pixy_line_detected = false;
 uint8_t pixy_line_start[2], pixy_line_end[2];
-static bool full = false;
-static int full_time = 0;
+
+static bool bin_full = false;
+static int bin_full_count = 0;
 
 void init_kobuki() {
 	ret_code_t error_code = NRF_SUCCESS;
@@ -175,14 +176,18 @@ void update_sensors() {
     // UART stopped. Try to reinit the serial receiever.
     const nrf_serial_config_t *old_config = serial_ref->p_ctx->p_config;
 
+    lcd_printf(0, "Reconn Kobuki");
     nrf_serial_uninit(serial_ref);
     status = nrf_serial_init(serial_ref, &m_uart0_drv_config, old_config);
+    lcd_printf(0, "Reconn Kobuki %ld", status);
     printf("Trying to reinit serial returned %ld\n", status);
   }
 
   pixy_line_detected = (0 == pixy_get_line_vector(
     &pixy_line_start[0], &pixy_line_start[1], 
     &pixy_line_end[0], &pixy_line_end[1]));
+
+  update_ultrasonic();
 }
 
 bool is_ultrasonic_full() {
@@ -195,24 +200,32 @@ bool is_ultrasonic_full() {
 }
 
 void update_ultrasonic() {
-  if (full) return;
+  // Call is_ultrasonic_full every 10 times
+  static int counts = 0;
+  counts++;
+  counts %= 10;
+
+  if (bin_full) return;
+
+  if (counts) return;
+
   bool is_full = is_ultrasonic_full();
   if (is_full) {
-    full_time++;
-    printf("%d\n", full_time);
+    bin_full_count++;
+    printf("%d\n", bin_full_count);
     // only detect full when ultrasonic sensor detects full 5 more times
-    if (full_time > 5) {
-      full = true;
+    if (bin_full_count > 5) {
+      bin_full = true;
     }
   } else {
-    full_time = 0;
+    bin_full_count = 0;
   }
 }
 
-bool is_full() {
-  return full;
+bool is_bin_full() {
+  return bin_full;
 }
 
-void clear_full() {
-  full = false;
+void clear_bin_full() {
+  bin_full = false;
 }
