@@ -16,6 +16,7 @@
 #include <nrf_log_ctrl.h>
 #include <nrf_log_default_backends.h>
 #include <nrf_pwr_mgmt.h>
+#include <nrf_serial.h>
 
 #include "pixy.h"
 #include "platform_kobuki.h"
@@ -159,11 +160,29 @@ void stop_kobuki(){
   kobukiDriveDirect(0, 0);
 }
 
+extern const nrf_serial_t *serial_ref;
+NRF_SERIAL_DRV_UART_CONFIG_DEF(m_uart0_drv_config,
+                      BUCKLER_UART_RX, BUCKLER_UART_TX,
+                      0, 0,
+                      NRF_UART_HWFC_DISABLED, NRF_UART_PARITY_EXCLUDED,
+                      NRF_UART_BAUDRATE_115200,
+                      UART_DEFAULT_CONFIG_IRQ_PRIORITY);
+
 void update_sensors() {
-  kobukiSensorPoll(&sensors);
-  // pixy_line_detected = (0 == pixy_get_line_vector(
-  //   &pixy_line_start[0], &pixy_line_start[1], 
-  //   &pixy_line_end[0], &pixy_line_end[1]));
+  int32_t status = kobukiSensorPoll(&sensors);
+
+  if(status == NRF_ERROR_TIMEOUT){
+    // UART stopped. Try to reinit the serial receiever.
+    const nrf_serial_config_t *old_config = serial_ref->p_ctx->p_config;
+
+    nrf_serial_uninit(serial_ref);
+    status = nrf_serial_init(serial_ref, &m_uart0_drv_config, old_config);
+    printf("Trying to reinit serial returned %ld\n", status);
+  }
+
+  pixy_line_detected = (0 == pixy_get_line_vector(
+    &pixy_line_start[0], &pixy_line_start[1], 
+    &pixy_line_end[0], &pixy_line_end[1]));
 }
 
 bool is_ultrasonic_full() {
