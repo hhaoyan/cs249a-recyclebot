@@ -36,6 +36,7 @@ APP_SOURCES += \
 	main.c \
 	Path_finding.c \
 	Path_finding_2.c \
+	Trash_carrier.c \
 	helper_funcs.c \
 	Rotate.c \
 	pixy.c \

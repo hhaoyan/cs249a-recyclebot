@@ -7,23 +7,26 @@
 #include "Path_finding.h"
 #include "Path_finding_2.h"
 #include "Rotate.h"
+#include "Trash_carrier.h"
 
 Path_finding pf_fsm;
-Path_finding_2 pf_2_fsm;
+// Path_finding_2 pf_2_fsm;
 Rotate r_fsm;
+Trash_carrier tc_fsm;
 
 void init_state_charts() {
   // initialize yakindu state machine
   // start statechart
+  trash_carrier_init(&tc_fsm);
+  trash_carrier_enter(&tc_fsm);
+
   path_finding_init(&pf_fsm);
-  // path_finding_enter(&pf_fsm);
-  path_finding_2_init(&pf_2_fsm);
+  path_finding_enter(&pf_fsm);
+  // path_finding_2_init(&pf_2_fsm);
   // path_finding_2_enter(&pf_2_fsm);
   rotate_init(&r_fsm);
   rotate_enter(&r_fsm);
 }
-
-
 
 int main(void) {
   // intialize platform
@@ -44,6 +47,10 @@ int main(void) {
     // if(cycle_idx++ % 10 == 0)
     //   printf("Running %ld cycle\n", cycle_idx);
     cycle_idx++;
+
+    trash_carrier_runCycle(&tc_fsm);
+    printf("%d\n", is_bin_full());
+    continue;
 
     if (false) {
       set_available(false);
