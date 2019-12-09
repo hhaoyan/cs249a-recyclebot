@@ -375,7 +375,15 @@ int pixy_get_barcodes(barcode** codes) {
   uint8_t* res = 0;
   uint8_t res_len = 0;
   uint8_t res_type = 0;
-  if(!pixy_packet_recv(&res, &res_len, &res_type)){
+  uint8_t retry = 10;
+  int recv_ret;
+  while((recv_ret=pixy_packet_recv(&res, &res_len, &res_type)) && retry){
+    retry--;
+    printf("Barcode: no response, retry: %d\n", retry);
+    wait_ms(100);
+  }
+
+  if(!recv_ret){
     if(res_type == 0x78){
 
       uint8_t n_codes = 0;
@@ -445,6 +453,7 @@ int pixy_get_line_vector(
     free(features);
   }else if(n_features==0){
     printf("pixy_get_line_vector: no line features\n");
+    free(features);
   }else{
     printf("pixy_get_line_vector: read from Pixy error!\n");
   }
