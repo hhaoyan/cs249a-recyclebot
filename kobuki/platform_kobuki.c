@@ -176,10 +176,10 @@ void update_sensors() {
     // UART stopped. Try to reinit the serial receiever.
     const nrf_serial_config_t *old_config = serial_ref->p_ctx->p_config;
 
-    lcd_printf(0, "Reconn Kobuki");
+    // lcd_printf(0, "Reconn Kobuki");
     nrf_serial_uninit(serial_ref);
     status = nrf_serial_init(serial_ref, &m_uart0_drv_config, old_config);
-    lcd_printf(0, "Reconn Kobuki %ld", status);
+    // lcd_printf(0, "Reconn Kobuki %ld", status);
     printf("Trying to reinit serial returned %ld\n", status);
   }
 

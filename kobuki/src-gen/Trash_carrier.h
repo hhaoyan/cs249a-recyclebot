@@ -17,28 +17,34 @@ extern "C" {
 
 /*! Define number of states in the state enum */
 
-#define TRASH_CARRIER_STATE_COUNT 5
+#define TRASH_CARRIER_STATE_COUNT 8
 
 /*! Define dimension of the state configuration vector for orthogonal states. */
-#define TRASH_CARRIER_MAX_ORTHOGONAL_STATES 2
+#define TRASH_CARRIER_MAX_ORTHOGONAL_STATES 1
 
 
 /*! Define indices of states in the StateConfVector */
-#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_STATION 0
-#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_FOLLOWING 0
-#define SCVI_TRASH_CARRIER_ROTATING_REGION_REST 1
-#define SCVI_TRASH_CARRIER_ROTATING_REGION_ROTATING_LEFT 1
-#define SCVI_TRASH_CARRIER_ROTATING_REGION_ROTATING_RIGHT 1
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_PATHFINDINGREGION 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_PATHFINDINGREGION_PATH_FINDING_REGION_STATION 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_PATHFINDINGREGION_PATH_FINDING_REGION_FOLLOWING 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_REST 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_ROTATING_LEFT 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_ROTATING_RIGHT 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_RESET_ALIGN 0
 
 /*! Enumeration of all states */ 
 typedef enum
 {
 	Trash_carrier_last_state,
-	Trash_carrier_Path_Finding_Region_Station,
-	Trash_carrier_Path_Finding_Region_Following,
-	Trash_carrier_Rotating_region_Rest,
-	Trash_carrier_Rotating_region_Rotating_Left,
-	Trash_carrier_Rotating_region_Rotating_Right
+	Trash_carrier_Path_Finding_Region_PathFindingRegion,
+	Trash_carrier_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_Station,
+	Trash_carrier_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_Following,
+	Trash_carrier_Path_Finding_Region_Rotation_Region,
+	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rest,
+	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rotating_Left,
+	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rotating_Right,
+	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Reset_Align
 } Trash_carrierStates;
 
 
@@ -63,7 +69,9 @@ typedef struct
 	uint8_t v_start_y;
 	uint8_t v_end_x;
 	uint8_t v_end_y;
+	sc_boolean bin_full;
 	float rotation;
+	float rotation_desired;
 	float rotation_diff;
 	float rotation_delta;
 } Trash_carrierIface;
@@ -150,10 +158,18 @@ extern void trash_carrierIface_set_v_end_x(Trash_carrier* handle, uint8_t value)
 extern uint8_t trash_carrierIface_get_v_end_y(const Trash_carrier* handle);
 /*! Sets the value of the variable 'v_end_y' that is defined in the default interface scope. */ 
 extern void trash_carrierIface_set_v_end_y(Trash_carrier* handle, uint8_t value);
+/*! Gets the value of the variable 'bin_full' that is defined in the default interface scope. */ 
+extern sc_boolean trash_carrierIface_get_bin_full(const Trash_carrier* handle);
+/*! Sets the value of the variable 'bin_full' that is defined in the default interface scope. */ 
+extern void trash_carrierIface_set_bin_full(Trash_carrier* handle, sc_boolean value);
 /*! Gets the value of the variable 'rotation' that is defined in the default interface scope. */ 
 extern float trash_carrierIface_get_rotation(const Trash_carrier* handle);
 /*! Sets the value of the variable 'rotation' that is defined in the default interface scope. */ 
 extern void trash_carrierIface_set_rotation(Trash_carrier* handle, float value);
+/*! Gets the value of the variable 'rotation_desired' that is defined in the default interface scope. */ 
+extern float trash_carrierIface_get_rotation_desired(const Trash_carrier* handle);
+/*! Sets the value of the variable 'rotation_desired' that is defined in the default interface scope. */ 
+extern void trash_carrierIface_set_rotation_desired(Trash_carrier* handle, float value);
 /*! Gets the value of the variable 'rotation_diff' that is defined in the default interface scope. */ 
 extern float trash_carrierIface_get_rotation_diff(const Trash_carrier* handle);
 /*! Sets the value of the variable 'rotation_diff' that is defined in the default interface scope. */ 

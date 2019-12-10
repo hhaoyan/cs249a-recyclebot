@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-extern float normalize_rot(float x);
+extern float normalize_rot(float desired, float now);
 
 extern float update_dist(float dist, uint16_t prev_encoder, bool is_forward);
 

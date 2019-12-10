@@ -46,6 +46,7 @@ void init_bluetooth() {
 }
 
 float get_rotate() {
+  printf("get rotate %d\n", rot);
   return rot;
 }
 
