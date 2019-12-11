@@ -5,6 +5,10 @@
 4. Be Depresso, Nothing works
 5. Bam. Trash Sorted.
 
+# Notes
+* sudo date -s "12/11 14:28:00"
+ 
+
 # Google Cloud Vision
 * [Project](https://console.cloud.google.com/home/dashboard?project=recyclebot-257717)
 * [API](https://cloud.google.com/vision/docs/libraries)

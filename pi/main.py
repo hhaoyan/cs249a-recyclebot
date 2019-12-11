@@ -5,6 +5,8 @@ from ble import BleController
 import RPi.GPIO as GPIO
 import time
 
+with_ble = True
+
 def get_labels(content):
     client = vision.ImageAnnotatorClient()
 
@@ -116,6 +118,8 @@ compost_labels = [
     'scraps'
 ]
 
+nothing_labels = ['ceiling', 'floor', 'architecture', 'flooring']
+
 def get_fine_grain_labels(google_cloud_labels):
     fine_grain_labels = []
     for elem in google_cloud_labels:
@@ -123,11 +127,12 @@ def get_fine_grain_labels(google_cloud_labels):
     fine_grain_labels.extend(google_cloud_labels)
     fine_grain_labels = [label.lower() for label in fine_grain_labels]
     return fine_grain_labels
-
+ 
 def get_classification(fine_grain_labels):
     count_recycling = 0
     count_compost = 0
     count_trash = 0
+    count_nothing = 0
     for elem in fine_grain_labels:
         if elem in recycling_labels:
             count_recycling += 1
@@ -135,7 +140,10 @@ def get_classification(fine_grain_labels):
             count_trash += 1
         if elem in compost_labels:
             count_compost += 1
-        
+        if elem in nothing_labels:
+            count_nothing += 1
+    if count_nothing >= 3:
+        return 'unknown'
     classification = None
     print('count_recycling: {}, count_compost: {}, count_trash: {}'.format(count_recycling, count_compost, count_trash))
     if count_recycling > count_trash and count_recycling > count_compost:
@@ -168,7 +176,8 @@ def take_picture_classify_on_cloud_send_rotate_signal():
     classification = get_classification(fine_grain_labels)
     print('labels:', google_cloud_labels)
     print('classification:', classification)
-    send_angle(classification)
+    if with_ble:
+      send_angle(classification)
     # send an angle command to the buckler
 
 count = 0
@@ -191,7 +200,8 @@ def button_callback(channel):
         last_time = int(time.time())
 
 if __name__ == '__main__':
-    ble = BleController(3)
+    if with_ble:
+      ble = BleController(3)
     cam = CameraController(rotation=180)
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
@@ -201,4 +211,4 @@ if __name__ == '__main__':
 
     message = input("Press enter to quit\n\n")
     GPIO.cleanup()
-
+ 
