@@ -375,7 +375,15 @@ int pixy_get_barcodes(barcode** codes) {
   uint8_t* res = 0;
   uint8_t res_len = 0;
   uint8_t res_type = 0;
-  if(!pixy_packet_recv(&res, &res_len, &res_type)){
+  uint8_t retry = 10;
+  int recv_ret;
+  while((recv_ret=pixy_packet_recv(&res, &res_len, &res_type)) && retry){
+    retry--;
+    printf("Barcode: no response, retry: %d\n", retry);
+    wait_ms(100);
+  }
+
+  if(!recv_ret){
     if(res_type == 0x78){
 
       uint8_t n_codes = 0;
@@ -432,7 +440,7 @@ int pixy_get_line_vector(
             *y0 = (uint8_t)((uint16_t)(data[1])*255/52);
             *x1 = (uint8_t)((uint16_t)(data[2])*255/79);
             *y1 = (uint8_t)((uint16_t)(data[3])*255/52);
-            printf("pixy_get_line_vector: vector found: (%d,%d)->(%d,%d)\n", *x0, *y0, *x1, *y1);
+            // printf("pixy_get_line_vector: vector found: (%d,%d)->(%d,%d)\n", *x0, *y0, *x1, *y1);
           }
         }
         break;
@@ -444,7 +452,8 @@ int pixy_get_line_vector(
     }
     free(features);
   }else if(n_features==0){
-    printf("pixy_get_line_vector: no line features\n");
+    // printf("pixy_get_line_vector: no line features\n");
+    free(features);
   }else{
     printf("pixy_get_line_vector: read from Pixy error!\n");
   }

@@ -1,6 +1,6 @@
 GeneratorModel for yakindu::c {
 
-	statechart path_finding {
+	statechart trash_carrier {
 
 		feature Outlet {
 			targetProject = "recycle"

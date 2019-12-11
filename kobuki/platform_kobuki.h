@@ -10,7 +10,7 @@ typedef enum {
 } lcd_line_t;
 
 extern KobukiSensors_t sensors;
-extern bool pixy_line_detected;
+extern float pixy_line_detected; // [0, 1]: threshold 0.5
 extern uint8_t pixy_line_start[2], pixy_line_end[2];
 
 extern void init_kobuki();
@@ -23,7 +23,7 @@ extern bool is_center_bumper();
 extern bool is_left_bumper();
 extern bool is_right_bumper();
 
-inline bool is_vec_detected(){return pixy_line_detected;}
+inline bool is_vec_detected(){return pixy_line_detected > 0.5f;}
 inline uint8_t vec_start_x(){return pixy_line_start[0];}
 inline uint8_t vec_start_y(){return pixy_line_start[1];}
 inline uint8_t vec_end_x(){return pixy_line_end[0];}
@@ -38,6 +38,7 @@ extern uint16_t read_encoder();
 
 extern void drive_kobuki(int16_t left_wheel, int16_t right_wheel);
 extern void stop_kobuki();
+extern void stop_kobuki_now();
 
 extern int lcd_printf(lcd_line_t line, const char* fmt, ...)
 __attribute__ ((format (printf, 2, 3)));
@@ -45,7 +46,7 @@ extern void lcd_clear();
 
 extern bool is_ultrasonic_full();
 extern void update_ultrasonic();
-extern bool is_full();
-extern void clear_full();
+extern bool is_bin_full();
+extern void clear_bin_full();
 
 #endif

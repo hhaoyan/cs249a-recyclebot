@@ -9,9 +9,17 @@
 #include "helper_funcs.h"
 #include "platform_kobuki.h"
 
-float normalize_rot(float x) {
-  int n = round(x / 360.0f);
-  return x - n * 360.0f;
+float normalize_rot(float desired, float now) {
+  desired -= floor(desired / 360.0f) * 360.0f;
+  now -= floor(now / 360.0f) * 360.0f;
+  // Never cross 180 deg
+  if(desired < 180 && now > 180) {
+    return 360 - (now - desired);
+  } else if (desired > 180 && now < 180) {
+    return -360 + (desired - now);
+  } else {
+    return desired - now;
+  }
 }
 
 float update_dist(float dist, uint16_t prev_encoder, bool is_forward){

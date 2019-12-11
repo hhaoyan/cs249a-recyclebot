@@ -43,12 +43,13 @@ int main(void) {
 
   uint16_t width, height;
   pixy_get_resolution(&width, &height);
-  pixy_set_lamp(1, 0);
+  pixy_set_lamp(0, 0);
 
   uint8_t x0, y0, x1, y1;
   static char buf[16];
-  // barcode* barcodes;
+
   while(1){
+    
     if(pixy_get_line_vector(&x0, &y0, &x1, &y1)){
       snprintf(buf, 16, "No vector!");
       display_write(buf, DISPLAY_LINE_0);
@@ -60,11 +61,11 @@ int main(void) {
       snprintf(buf, 16, "%d,%d-%d,%d", x0, y0, x1, y1);
       display_write(buf, DISPLAY_LINE_1);
     }
-
-    // get_pixy_vector();
     
-    /*printf("*******Request bar codes*******\n");
+    /*
+    printf("*******Request bar codes*******\n");
 
+    barcode* barcodes;
     int n_codes = pixy_get_barcodes(&barcodes);
 
     if(n_codes > 0){
@@ -79,7 +80,8 @@ int main(void) {
     }else{
       printf("Read from Pixy error!\n");
     }
-    while(1);*/
-    wait_ms(50);
+    while(1);
+    */
+    wait_ms(1000);
   }
 }
