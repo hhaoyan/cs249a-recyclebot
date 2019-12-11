@@ -27,7 +27,7 @@
           <vertices xsi:type="sgraph:State" xmi:id="_gkI8Xhr1EeqVh5WCvC2y2Q" specification="entry/&#xA;lcd_printf(0, &quot;Resting&quot;);&#xA;rotation_diff = 0&#xA;&#xA;always/&#xA;rotation_desired = get_rotate();&#xA;rotation_diff = normalize_rot(rotation_desired, rotation);&#xA;bin_full = is_bin_full();&#xA;has_vec = is_vec_detected();&#xA;v_start_x = vec_start_x();&#xA;v_start_y = vec_start_y();&#xA;v_end_x = vec_end_x();&#xA;v_end_y = vec_end_y();&#xA;stop_kobuki()&#xA;&#xA;exit/&#xA;stop_kobuki()" name="Rest" incomingTransitions="_gkN07Br1EeqVh5WCvC2y2Q _gkQQ9hr1EeqVh5WCvC2y2Q _gkRfERr1EeqVh5WCvC2y2Q _gkSGWhr1EeqVh5WCvC2y2Q">
             <outgoingTransitions xmi:id="_gkKKWRr1EeqVh5WCvC2y2Q" specification="[rotation_diff > 5.0f &amp;&amp; !bin_full]" target="_gkMmkBr1EeqVh5WCvC2y2Q"/>
             <outgoingTransitions xmi:id="_gkKKYBr1EeqVh5WCvC2y2Q" specification="[rotation_diff &lt; -5.0f &amp;&amp; !bin_full]" target="_gkPC0Br1EeqVh5WCvC2y2Q"/>
-            <outgoingTransitions xmi:id="_gkKKaBr1EeqVh5WCvC2y2Q" specification="[(&#xA;&#x9;rotation == 0 &amp;&amp; rotation_diff == 0 &amp;&amp; &#xA;&#x9;!has_vec &amp;&amp; (v_end_x > 157 || v_end_x &lt; 107)&#xA;) ||&#xA;&#x9;bin_full &amp;&amp; (!has_vec || (v_end_x > 157 || v_end_x &lt; 107))&#xA;]" target="_gkRfEhr1EeqVh5WCvC2y2Q"/>
+            <outgoingTransitions xmi:id="_gkKKaBr1EeqVh5WCvC2y2Q" specification="[(&#xA;&#x9;rotation == 0 &amp;&amp; rotation_diff == 0 &amp;&amp; &#xA;&#x9;(!has_vec || v_end_x > 157 || v_end_x &lt; 107)&#xA;) ||&#xA;&#x9;bin_full &amp;&amp; (!has_vec || (v_end_x > 157 || v_end_x &lt; 107))&#xA;]" target="_gkRfEhr1EeqVh5WCvC2y2Q"/>
             <outgoingTransitions xmi:id="_oe1h4Br1EeqVh5WCvC2y2Q" specification="[bin_full &amp;&amp; has_vec &amp;&amp; (v_end_x &lt; 157 &amp;&amp; v_end_x > 107)]" target="_Ro0MYBr1EeqVh5WCvC2y2Q"/>
           </vertices>
           <vertices xsi:type="sgraph:State" xmi:id="_gkMmkBr1EeqVh5WCvC2y2Q" specification="entry/&#xA;lcd_printf(0, &quot;Rotating_Left&quot;);&#xA;lcd_printf(1, &quot;Rot left: %f&quot;, rotation_diff);&#xA;rotation_delta = 0;&#xA;start_gyro();&#xA;stop_kobuki()&#xA;&#x9;&#xA;always/&#xA;rotation_delta = read_gyro();&#xA;lcd_printf(1, &quot;Rot %f&quot;, rotation_delta);&#xA;drive_kobuki(-150, 150)&#xA;&#xA;exit/&#xA;stop_gyro();&#xA;rotation = rotation_desired;&#xA;stop_kobuki()" name="Rotating_Left" incomingTransitions="_gkKKWRr1EeqVh5WCvC2y2Q">
@@ -39,7 +39,7 @@
           <vertices xsi:type="sgraph:Entry" xmi:id="_gkRfEBr1EeqVh5WCvC2y2Q">
             <outgoingTransitions xmi:id="_gkRfERr1EeqVh5WCvC2y2Q" specification="" target="_gkI8Xhr1EeqVh5WCvC2y2Q"/>
           </vertices>
-          <vertices xsi:type="sgraph:State" xmi:id="_gkRfEhr1EeqVh5WCvC2y2Q" specification="entry/&#xA;lcd_printf(0, &quot;Aligning&quot;)&#xA;&#xA;always/&#xA;has_vec = is_vec_detected();&#xA;v_start_x = vec_start_x();&#xA;v_start_y = vec_start_y();&#xA;v_end_x = vec_end_x();&#xA;v_end_y = vec_end_y();&#xA;lcd_printf(1, &quot;Line %d&quot;, has_vec ? v_end_x: -1);&#xA;drive_kobuki(100, -100)&#xA;&#xA;exit/&#xA;stop_kobuki()" name="Reset_Align" incomingTransitions="_gkKKaBr1EeqVh5WCvC2y2Q">
+          <vertices xsi:type="sgraph:State" xmi:id="_gkRfEhr1EeqVh5WCvC2y2Q" specification="entry/&#xA;lcd_printf(0, &quot;Aligning&quot;)&#xA;&#xA;always/&#xA;has_vec = is_vec_detected();&#xA;v_start_x = vec_start_x();&#xA;v_start_y = vec_start_y();&#xA;v_end_x = vec_end_x();&#xA;v_end_y = vec_end_y();&#xA;lcd_printf(1, &quot;Line %d&quot;, has_vec ? v_end_x: -1);&#xA;drive_kobuki(50, -50)&#xA;&#xA;exit/&#xA;stop_kobuki_now()" name="Reset_Align" incomingTransitions="_gkKKaBr1EeqVh5WCvC2y2Q">
             <outgoingTransitions xmi:id="_gkSGWhr1EeqVh5WCvC2y2Q" specification="[has_vec &amp;&amp; (v_end_x &lt; 157 &amp;&amp; v_end_x > 107)]" target="_gkI8Xhr1EeqVh5WCvC2y2Q"/>
           </vertices>
         </regions>
@@ -376,7 +376,7 @@
     <edges xmi:id="_gkT7YRr1EeqVh5WCvC2y2Q" type="Transition" element="_gkKKaBr1EeqVh5WCvC2y2Q" source="_gkIVIRr1EeqVh5WCvC2y2Q" target="_gkI8Uhr1EeqVh5WCvC2y2Q">
       <children xsi:type="notation:DecorationNode" xmi:id="_gkT7Yhr1EeqVh5WCvC2y2Q" type="TransitionExpression">
         <styles xsi:type="notation:ShapeStyle" xmi:id="_gkT7Yxr1EeqVh5WCvC2y2Q"/>
-        <layoutConstraint xsi:type="notation:Location" xmi:id="_gkT7ZBr1EeqVh5WCvC2y2Q" x="36" y="174"/>
+        <layoutConstraint xsi:type="notation:Location" xmi:id="_gkT7ZBr1EeqVh5WCvC2y2Q" x="36" y="156"/>
       </children>
       <styles xsi:type="notation:ConnectorStyle" xmi:id="_gkT7ZRr1EeqVh5WCvC2y2Q" routing="Rectilinear" lineColor="4210752"/>
       <styles xsi:type="notation:FontStyle" xmi:id="_gkT7Zhr1EeqVh5WCvC2y2Q" fontName="Verdana"/>

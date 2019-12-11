@@ -523,7 +523,7 @@ static void exact_Path_Finding_Region_Rotation_Region_r1_Rotating_Right(Trash_ca
 static void exact_Path_Finding_Region_Rotation_Region_r1_Reset_Align(Trash_carrier* handle)
 {
 	/* Exit action for state 'Reset_Align'. */
-	stop_kobuki();
+	stop_kobuki_now();
 }
 
 /* 'default' enter sequence for state PathFindingRegion */
@@ -1015,7 +1015,7 @@ static sc_boolean Path_Finding_Region_Rotation_Region_r1_Rest_react(Trash_carrie
 					enseq_Path_Finding_Region_Rotation_Region_r1_Rotating_Right_default(handle);
 				}  else
 				{
-					if (((((((handle->iface.rotation) == (0)) && ((handle->iface.rotation_diff) == (0))) && (handle->iface.has_vec == bool_false)) && ((((handle->iface.v_end_x) > (157)) || ((handle->iface.v_end_x) < (107))) == bool_true)) == bool_true) || ((handle->iface.bin_full == bool_true) && (((handle->iface.has_vec == bool_false) || ((((handle->iface.v_end_x) > (157)) || ((handle->iface.v_end_x) < (107))) == bool_true)) == bool_true)))
+					if ((((((handle->iface.rotation) == (0)) && ((handle->iface.rotation_diff) == (0))) && ((((handle->iface.has_vec == bool_false) || ((handle->iface.v_end_x) > (157))) || ((handle->iface.v_end_x) < (107))) == bool_true)) == bool_true) || ((handle->iface.bin_full == bool_true) && (((handle->iface.has_vec == bool_false) || ((((handle->iface.v_end_x) > (157)) || ((handle->iface.v_end_x) < (107))) == bool_true)) == bool_true)))
 					{ 
 						exseq_Path_Finding_Region_Rotation_Region_r1_Rest(handle);
 						enseq_Path_Finding_Region_Rotation_Region_r1_Reset_Align_default(handle);
@@ -1126,7 +1126,7 @@ static sc_boolean Path_Finding_Region_Rotation_Region_r1_Reset_Align_react(Trash
 		handle->iface.v_end_x = vec_end_x();
 		handle->iface.v_end_y = vec_end_y();
 		lcd_printf(1, "Line %d", handle->iface.has_vec ? handle->iface.v_end_x : -1);
-		drive_kobuki(100, -100);
+		drive_kobuki(50, -50);
 	} 
 	return did_transition;
 }
