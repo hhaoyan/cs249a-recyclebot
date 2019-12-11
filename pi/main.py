@@ -168,7 +168,7 @@ def take_picture_classify_on_cloud_send_rotate_signal():
     classification = get_classification(fine_grain_labels)
     print('labels:', google_cloud_labels)
     print('classification:', classification)
-    # send_angle(classification)
+    send_angle(classification)
     # send an angle command to the buckler
 
 count = 0
@@ -191,8 +191,8 @@ def button_callback(channel):
         last_time = int(time.time())
 
 if __name__ == '__main__':
-    # ble = BleController(3)
-    cam = CameraController()
+    ble = BleController(3)
+    cam = CameraController(rotation=180)
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
