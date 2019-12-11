@@ -212,10 +212,10 @@ void update_ultrasonic() {
   bool is_full = is_ultrasonic_full();
   if (is_full) {
     bin_full_count++;
-    printf("%d\n", bin_full_count);
     // only detect full when ultrasonic sensor detects full 5 more times
     if (bin_full_count > 5) {
       bin_full = true;
+      bin_full_count = 0;
     }
   } else {
     bin_full_count = 0;

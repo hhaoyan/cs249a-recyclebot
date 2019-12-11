@@ -17,7 +17,7 @@ extern "C" {
 
 /*! Define number of states in the state enum */
 
-#define TRASH_CARRIER_STATE_COUNT 8
+#define TRASH_CARRIER_STATE_COUNT 10
 
 /*! Define dimension of the state configuration vector for orthogonal states. */
 #define TRASH_CARRIER_MAX_ORTHOGONAL_STATES 1
@@ -25,8 +25,10 @@ extern "C" {
 
 /*! Define indices of states in the StateConfVector */
 #define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_PATHFINDINGREGION 0
-#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_PATHFINDINGREGION_PATH_FINDING_REGION_STATION 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_PATHFINDINGREGION_PATH_FINDING_REGION_WAITPICKUP 0
 #define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_PATHFINDINGREGION_PATH_FINDING_REGION_FOLLOWING 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_PATHFINDINGREGION_PATH_FINDING_REGION_STARTPATHFINDING 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_PATHFINDINGREGION_PATH_FINDING_REGION_RESET_ALIGN 0
 #define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION 0
 #define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_REST 0
 #define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_ROTATING_LEFT 0
@@ -38,8 +40,10 @@ typedef enum
 {
 	Trash_carrier_last_state,
 	Trash_carrier_Path_Finding_Region_PathFindingRegion,
-	Trash_carrier_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_Station,
+	Trash_carrier_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_WaitPickup,
 	Trash_carrier_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_Following,
+	Trash_carrier_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_StartPathFinding,
+	Trash_carrier_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_Reset_Align,
 	Trash_carrier_Path_Finding_Region_Rotation_Region,
 	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rest,
 	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rotating_Left,
@@ -64,6 +68,7 @@ typedef struct
 	int16_t base_speed;
 	int16_t speed_left;
 	int16_t speed_right;
+	sc_boolean trash_picked;
 	sc_boolean has_vec;
 	uint8_t v_start_x;
 	uint8_t v_start_y;
@@ -138,6 +143,10 @@ extern void trash_carrierIface_set_speed_left(Trash_carrier* handle, int16_t val
 extern int16_t trash_carrierIface_get_speed_right(const Trash_carrier* handle);
 /*! Sets the value of the variable 'speed_right' that is defined in the default interface scope. */ 
 extern void trash_carrierIface_set_speed_right(Trash_carrier* handle, int16_t value);
+/*! Gets the value of the variable 'trash_picked' that is defined in the default interface scope. */ 
+extern sc_boolean trash_carrierIface_get_trash_picked(const Trash_carrier* handle);
+/*! Sets the value of the variable 'trash_picked' that is defined in the default interface scope. */ 
+extern void trash_carrierIface_set_trash_picked(Trash_carrier* handle, sc_boolean value);
 /*! Gets the value of the variable 'has_vec' that is defined in the default interface scope. */ 
 extern sc_boolean trash_carrierIface_get_has_vec(const Trash_carrier* handle);
 /*! Sets the value of the variable 'has_vec' that is defined in the default interface scope. */ 

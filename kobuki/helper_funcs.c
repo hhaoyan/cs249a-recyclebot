@@ -13,7 +13,6 @@ float normalize_rot(float desired, float now) {
   desired -= floor(desired / 360.0f) * 360.0f;
   now -= floor(now / 360.0f) * 360.0f;
   // Never cross 180 deg
-  printf("nor %f %f\n", desired, now);
   if(desired < 180 && now > 180) {
     return 360 - (now - desired);
   } else if (desired > 180 && now < 180) {
