@@ -28,7 +28,7 @@ NRF_TWI_MNGR_DEF(twi_mngr_instance, 5, 0);
 static nrf_drv_spi_t spi_instance = NRF_DRV_SPI_INSTANCE(1);
 
 KobukiSensors_t sensors = {0};
-bool pixy_line_detected = false;
+float pixy_line_detected = 0.f;
 uint8_t pixy_line_start[2], pixy_line_end[2];
 
 static bool bin_full = false;
@@ -183,9 +183,10 @@ void update_sensors() {
     printf("Trying to reinit serial returned %ld\n", status);
   }
 
-  pixy_line_detected = (0 == pixy_get_line_vector(
+  pixy_line_detected *= 0.85f;
+  pixy_line_detected += (0 == pixy_get_line_vector(
     &pixy_line_start[0], &pixy_line_start[1], 
-    &pixy_line_end[0], &pixy_line_end[1]));
+    &pixy_line_end[0], &pixy_line_end[1])) ? 0.15f : 0f;
 
   update_ultrasonic();
 }
