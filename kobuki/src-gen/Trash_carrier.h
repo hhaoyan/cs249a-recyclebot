@@ -17,7 +17,7 @@ extern "C" {
 
 /*! Define number of states in the state enum */
 
-#define TRASH_CARRIER_STATE_COUNT 10
+#define TRASH_CARRIER_STATE_COUNT 11
 
 /*! Define dimension of the state configuration vector for orthogonal states. */
 #define TRASH_CARRIER_MAX_ORTHOGONAL_STATES 1
@@ -34,6 +34,7 @@ extern "C" {
 #define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_ROTATING_LEFT 0
 #define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_ROTATING_RIGHT 0
 #define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_RESET_ALIGN 0
+#define SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_STARTROTATE 0
 
 /*! Enumeration of all states */ 
 typedef enum
@@ -48,7 +49,8 @@ typedef enum
 	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rest,
 	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rotating_Left,
 	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rotating_Right,
-	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Reset_Align
+	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Reset_Align,
+	Trash_carrier_Path_Finding_Region_Rotation_Region_r1_startRotate
 } Trash_carrierStates;
 
 

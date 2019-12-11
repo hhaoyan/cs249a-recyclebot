@@ -15,6 +15,7 @@ static void enact_Path_Finding_Region_Rotation_Region_r1_Rest(Trash_carrier* han
 static void enact_Path_Finding_Region_Rotation_Region_r1_Rotating_Left(Trash_carrier* handle);
 static void enact_Path_Finding_Region_Rotation_Region_r1_Rotating_Right(Trash_carrier* handle);
 static void enact_Path_Finding_Region_Rotation_Region_r1_Reset_Align(Trash_carrier* handle);
+static void enact_Path_Finding_Region_Rotation_Region_r1_startRotate(Trash_carrier* handle);
 static void exact_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_Following(Trash_carrier* handle);
 static void exact_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_Reset_Align(Trash_carrier* handle);
 static void exact_Path_Finding_Region_Rotation_Region_r1_Rest(Trash_carrier* handle);
@@ -31,6 +32,7 @@ static void enseq_Path_Finding_Region_Rotation_Region_r1_Rest_default(Trash_carr
 static void enseq_Path_Finding_Region_Rotation_Region_r1_Rotating_Left_default(Trash_carrier* handle);
 static void enseq_Path_Finding_Region_Rotation_Region_r1_Rotating_Right_default(Trash_carrier* handle);
 static void enseq_Path_Finding_Region_Rotation_Region_r1_Reset_Align_default(Trash_carrier* handle);
+static void enseq_Path_Finding_Region_Rotation_Region_r1_startRotate_default(Trash_carrier* handle);
 static void enseq_Path_Finding_Region_default(Trash_carrier* handle);
 static void enseq_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_default(Trash_carrier* handle);
 static void enseq_Path_Finding_Region_Rotation_Region_r1_default(Trash_carrier* handle);
@@ -44,6 +46,7 @@ static void exseq_Path_Finding_Region_Rotation_Region_r1_Rest(Trash_carrier* han
 static void exseq_Path_Finding_Region_Rotation_Region_r1_Rotating_Left(Trash_carrier* handle);
 static void exseq_Path_Finding_Region_Rotation_Region_r1_Rotating_Right(Trash_carrier* handle);
 static void exseq_Path_Finding_Region_Rotation_Region_r1_Reset_Align(Trash_carrier* handle);
+static void exseq_Path_Finding_Region_Rotation_Region_r1_startRotate(Trash_carrier* handle);
 static void exseq_Path_Finding_Region(Trash_carrier* handle);
 static void exseq_Path_Finding_Region_PathFindingRegion_Path_Finding_Region(Trash_carrier* handle);
 static void exseq_Path_Finding_Region_Rotation_Region_r1(Trash_carrier* handle);
@@ -61,6 +64,7 @@ static sc_boolean Path_Finding_Region_Rotation_Region_r1_Rest_react(Trash_carrie
 static sc_boolean Path_Finding_Region_Rotation_Region_r1_Rotating_Left_react(Trash_carrier* handle, const sc_boolean try_transition);
 static sc_boolean Path_Finding_Region_Rotation_Region_r1_Rotating_Right_react(Trash_carrier* handle, const sc_boolean try_transition);
 static sc_boolean Path_Finding_Region_Rotation_Region_r1_Reset_Align_react(Trash_carrier* handle, const sc_boolean try_transition);
+static sc_boolean Path_Finding_Region_Rotation_Region_r1_startRotate_react(Trash_carrier* handle, const sc_boolean try_transition);
 static void clearInEvents(Trash_carrier* handle);
 static void clearOutEvents(Trash_carrier* handle);
 
@@ -158,6 +162,11 @@ void trash_carrier_runCycle(Trash_carrier* handle)
 			Path_Finding_Region_Rotation_Region_r1_Reset_Align_react(handle, bool_true);
 			break;
 		}
+		case Trash_carrier_Path_Finding_Region_Rotation_Region_r1_startRotate:
+		{
+			Path_Finding_Region_Rotation_Region_r1_startRotate_react(handle, bool_true);
+			break;
+		}
 		default:
 			break;
 		}
@@ -222,7 +231,7 @@ sc_boolean trash_carrier_isStateActive(const Trash_carrier* handle, Trash_carrie
 			break;
 		case Trash_carrier_Path_Finding_Region_Rotation_Region :
 			result = (sc_boolean) (handle->stateConfVector[SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION] >= Trash_carrier_Path_Finding_Region_Rotation_Region
-				&& handle->stateConfVector[SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION] <= Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Reset_Align);
+				&& handle->stateConfVector[SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION] <= Trash_carrier_Path_Finding_Region_Rotation_Region_r1_startRotate);
 			break;
 		case Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rest :
 			result = (sc_boolean) (handle->stateConfVector[SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_REST] == Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Rest
@@ -238,6 +247,10 @@ sc_boolean trash_carrier_isStateActive(const Trash_carrier* handle, Trash_carrie
 			break;
 		case Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Reset_Align :
 			result = (sc_boolean) (handle->stateConfVector[SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_RESET_ALIGN] == Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Reset_Align
+			);
+			break;
+		case Trash_carrier_Path_Finding_Region_Rotation_Region_r1_startRotate :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_TRASH_CARRIER_PATH_FINDING_REGION_ROTATION_REGION_R1_STARTROTATE] == Trash_carrier_Path_Finding_Region_Rotation_Region_r1_startRotate
 			);
 			break;
 		default:
@@ -479,6 +492,14 @@ static void enact_Path_Finding_Region_Rotation_Region_r1_Reset_Align(Trash_carri
 	lcd_printf(0, "Aligning");
 }
 
+/* Entry action for state 'startRotate'. */
+static void enact_Path_Finding_Region_Rotation_Region_r1_startRotate(Trash_carrier* handle)
+{
+	/* Entry action for state 'startRotate'. */
+	handle->iface.rotation = 0;
+	handle->iface.rotation_diff = 0;
+}
+
 /* Exit action for state 'Following'. */
 static void exact_Path_Finding_Region_PathFindingRegion_Path_Finding_Region_Following(Trash_carrier* handle)
 {
@@ -612,6 +633,15 @@ static void enseq_Path_Finding_Region_Rotation_Region_r1_Reset_Align_default(Tra
 	handle->stateConfVectorPosition = 0;
 }
 
+/* 'default' enter sequence for state startRotate */
+static void enseq_Path_Finding_Region_Rotation_Region_r1_startRotate_default(Trash_carrier* handle)
+{
+	/* 'default' enter sequence for state startRotate */
+	enact_Path_Finding_Region_Rotation_Region_r1_startRotate(handle);
+	handle->stateConfVector[0] = Trash_carrier_Path_Finding_Region_Rotation_Region_r1_startRotate;
+	handle->stateConfVectorPosition = 0;
+}
+
 /* 'default' enter sequence for region Path Finding Region */
 static void enseq_Path_Finding_Region_default(Trash_carrier* handle)
 {
@@ -717,6 +747,14 @@ static void exseq_Path_Finding_Region_Rotation_Region_r1_Reset_Align(Trash_carri
 	exact_Path_Finding_Region_Rotation_Region_r1_Reset_Align(handle);
 }
 
+/* Default exit sequence for state startRotate */
+static void exseq_Path_Finding_Region_Rotation_Region_r1_startRotate(Trash_carrier* handle)
+{
+	/* Default exit sequence for state startRotate */
+	handle->stateConfVector[0] = Trash_carrier_last_state;
+	handle->stateConfVectorPosition = 0;
+}
+
 /* Default exit sequence for region Path Finding Region */
 static void exseq_Path_Finding_Region(Trash_carrier* handle)
 {
@@ -762,6 +800,11 @@ static void exseq_Path_Finding_Region(Trash_carrier* handle)
 		case Trash_carrier_Path_Finding_Region_Rotation_Region_r1_Reset_Align :
 		{
 			exseq_Path_Finding_Region_Rotation_Region_r1_Reset_Align(handle);
+			break;
+		}
+		case Trash_carrier_Path_Finding_Region_Rotation_Region_r1_startRotate :
+		{
+			exseq_Path_Finding_Region_Rotation_Region_r1_startRotate(handle);
 			break;
 		}
 		default: break;
@@ -826,6 +869,11 @@ static void exseq_Path_Finding_Region_Rotation_Region_r1(Trash_carrier* handle)
 			exseq_Path_Finding_Region_Rotation_Region_r1_Reset_Align(handle);
 			break;
 		}
+		case Trash_carrier_Path_Finding_Region_Rotation_Region_r1_startRotate :
+		{
+			exseq_Path_Finding_Region_Rotation_Region_r1_startRotate(handle);
+			break;
+		}
 		default: break;
 	}
 }
@@ -841,7 +889,7 @@ static void react_Path_Finding_Region_PathFindingRegion_Path_Finding_Region__ent
 static void react_Path_Finding_Region_Rotation_Region_r1__entry_Default(Trash_carrier* handle)
 {
 	/* Default react sequence for initial entry  */
-	enseq_Path_Finding_Region_Rotation_Region_r1_Rest_default(handle);
+	enseq_Path_Finding_Region_Rotation_Region_r1_startRotate_default(handle);
 }
 
 /* Default react sequence for initial entry  */
@@ -1127,6 +1175,20 @@ static sc_boolean Path_Finding_Region_Rotation_Region_r1_Reset_Align_react(Trash
 		handle->iface.v_end_y = vec_end_y();
 		lcd_printf(1, "Line %d", handle->iface.has_vec ? handle->iface.v_end_x : -1);
 		drive_kobuki(50, -50);
+	} 
+	return did_transition;
+}
+
+static sc_boolean Path_Finding_Region_Rotation_Region_r1_startRotate_react(Trash_carrier* handle, const sc_boolean try_transition) {
+	/* The reactions of state startRotate. */
+	sc_boolean did_transition = try_transition;
+	if (try_transition == bool_true)
+	{ 
+		if ((Path_Finding_Region_Rotation_Region_react(handle, try_transition)) == (bool_false))
+		{ 
+			exseq_Path_Finding_Region_Rotation_Region_r1_startRotate(handle);
+			enseq_Path_Finding_Region_Rotation_Region_r1_Reset_Align_default(handle);
+		} 
 	} 
 	return did_transition;
 }
