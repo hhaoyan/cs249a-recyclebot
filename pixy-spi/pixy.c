@@ -440,7 +440,7 @@ int pixy_get_line_vector(
             *y0 = (uint8_t)((uint16_t)(data[1])*255/52);
             *x1 = (uint8_t)((uint16_t)(data[2])*255/79);
             *y1 = (uint8_t)((uint16_t)(data[3])*255/52);
-            printf("pixy_get_line_vector: vector found: (%d,%d)->(%d,%d)\n", *x0, *y0, *x1, *y1);
+            // printf("pixy_get_line_vector: vector found: (%d,%d)->(%d,%d)\n", *x0, *y0, *x1, *y1);
           }
         }
         break;
@@ -452,7 +452,7 @@ int pixy_get_line_vector(
     }
     free(features);
   }else if(n_features==0){
-    printf("pixy_get_line_vector: no line features\n");
+    // printf("pixy_get_line_vector: no line features\n");
     free(features);
   }else{
     printf("pixy_get_line_vector: read from Pixy error!\n");
