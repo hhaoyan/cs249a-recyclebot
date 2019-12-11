@@ -38,6 +38,7 @@ extern uint16_t read_encoder();
 
 extern void drive_kobuki(int16_t left_wheel, int16_t right_wheel);
 extern void stop_kobuki();
+extern void stop_kobuki_now();
 
 extern int lcd_printf(lcd_line_t line, const char* fmt, ...)
 __attribute__ ((format (printf, 2, 3)));

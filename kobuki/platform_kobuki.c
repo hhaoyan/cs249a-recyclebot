@@ -153,12 +153,24 @@ uint16_t read_encoder(){
   return sensors.leftWheelEncoder;
 }
 
+int16_t real_left_wheel = 0, real_right_wheel = 0;
+#define INTERPOLATING_FACTOR 0.6f
+
 void drive_kobuki(int16_t left_wheel, int16_t right_wheel){
-  kobukiDriveDirect(left_wheel, right_wheel);
+  real_left_wheel = (int16_t)((float)real_left_wheel * INTERPOLATING_FACTOR + (float)left_wheel * (1-INTERPOLATING_FACTOR));
+  real_right_wheel = (int16_t)((float)real_right_wheel * INTERPOLATING_FACTOR + (float)right_wheel * (1-INTERPOLATING_FACTOR));
+  kobukiDriveDirect(real_left_wheel, real_right_wheel);
 }
 
 void stop_kobuki(){
-  kobukiDriveDirect(0, 0);
+  real_left_wheel = (int16_t)((float)real_left_wheel * INTERPOLATING_FACTOR);
+  real_right_wheel = (int16_t)((float)real_right_wheel * INTERPOLATING_FACTOR);
+  kobukiDriveDirect(real_left_wheel, real_right_wheel);
+}
+
+void stop_kobuki_now(){
+  real_left_wheel = real_right_wheel = 0;
+  kobukiDriveDirect(real_left_wheel, real_right_wheel);
 }
 
 extern const nrf_serial_t *serial_ref;
@@ -186,7 +198,7 @@ void update_sensors() {
   pixy_line_detected *= 0.85f;
   pixy_line_detected += (0 == pixy_get_line_vector(
     &pixy_line_start[0], &pixy_line_start[1], 
-    &pixy_line_end[0], &pixy_line_end[1])) ? 0.15f : 0f;
+    &pixy_line_end[0], &pixy_line_end[1])) ? 0.15f : 0.f;
 
   update_ultrasonic();
 }
