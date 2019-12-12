@@ -15,7 +15,7 @@
 
 /* whether to build support for PDF417 symbology */
 /* #undef ENABLE_PDF417 */
-#define ENABLE_PDF417 1
+//#define ENABLE_PDF417 1
 
 /* whether to build support for QR Code */
 #define ENABLE_QRCODE 1

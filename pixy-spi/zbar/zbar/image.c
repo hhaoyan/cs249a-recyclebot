@@ -26,7 +26,7 @@
 
 zbar_image_t *zbar_image_create ()
 {
-    zbar_image_t *img = calloc(1, sizeof(zbar_image_t));
+    zbar_image_t *img = __calloc(1, sizeof(zbar_image_t));
     _zbar_refcnt_init();
     _zbar_image_refcnt(img, 1);
     img->srcidx = -1;
@@ -39,7 +39,7 @@ void _zbar_image_free (zbar_image_t *img)
         zbar_symbol_set_ref(img->syms, -1);
         img->syms = NULL;
     }
-    free(img);
+    __free(img);
 }
 
 void zbar_image_destroy (zbar_image_t *img)
@@ -118,7 +118,7 @@ inline void zbar_image_free_data (zbar_image_t *img)
             cleanup(img);
         }
         else
-            free((void*)img->data);
+            __free((void*)img->data);
     }
     img->data = NULL;
 }
@@ -152,7 +152,7 @@ zbar_image_t *zbar_image_copy (const zbar_image_t *src)
     dst->width = src->width;
     dst->height = src->height;
     dst->datalen = src->datalen;
-    dst->data = malloc(src->datalen);
+    dst->data = __malloc(src->datalen);
     assert(dst->data);
     memcpy((void*)dst->data, src->data, src->datalen);
     dst->cleanup = zbar_image_free_data;

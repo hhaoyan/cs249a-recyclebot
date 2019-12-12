@@ -25,7 +25,7 @@
 #ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
 #endif
-#include <stdlib.h>     /* malloc, free */
+#include <stdlib.h>     /* __malloc, free */
 #include <time.h>       /* clock_gettime */
 #include <string.h>     /* memcmp, memset, memcpy */
 #include <assert.h>
@@ -151,7 +151,7 @@ void _zbar_image_scanner_recycle_syms (zbar_image_scanner_t *iscn,
                     break;
             if(i == RECYCLE_BUCKETS) {
                 assert(sym->data);
-                free(sym->data);
+                __free(sym->data);
                 sym->data = NULL;
                 sym->data_alloc = 0;
                 i = 0;
@@ -234,7 +234,7 @@ _zbar_image_scanner_alloc_sym (zbar_image_scanner_t *iscn,
         iscn->recycle[i].nsyms--;
     }
     else {
-        sym = calloc(1, sizeof(zbar_symbol_t));
+        sym = __calloc(1, sizeof(zbar_symbol_t));
         STAT(sym_new);
     }
 
@@ -250,14 +250,14 @@ _zbar_image_scanner_alloc_sym (zbar_image_scanner_t *iscn,
         sym->datalen = datalen - 1;
         if(sym->data_alloc < datalen) {
             if(sym->data)
-                free(sym->data);
+                __free(sym->data);
             sym->data_alloc = datalen;
-            sym->data = malloc(datalen);
+            sym->data = __malloc(datalen);
         }
     }
     else {
         if(sym->data)
-            free(sym->data);
+            __free(sym->data);
         sym->data = NULL;
         sym->datalen = sym->data_alloc = 0;
     }
@@ -444,7 +444,7 @@ static void symbol_handler (zbar_decoder_t *dcode)
 
 zbar_image_scanner_t *zbar_image_scanner_create ()
 {
-    zbar_image_scanner_t *iscn = calloc(1, sizeof(zbar_image_scanner_t));
+    zbar_image_scanner_t *iscn = __calloc(1, sizeof(zbar_image_scanner_t));
     if(!iscn)
         return(NULL);
     iscn->dcode = zbar_decoder_create();
@@ -513,7 +513,7 @@ void zbar_image_scanner_destroy (zbar_image_scanner_t *iscn)
         iscn->qr = NULL;
     }
 #endif
-    free(iscn);
+    __free(iscn);
 }
 
 zbar_image_data_handler_t*

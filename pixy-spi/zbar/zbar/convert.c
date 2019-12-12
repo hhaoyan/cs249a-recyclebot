@@ -370,7 +370,7 @@ static void convert_uvp_append (zbar_image_t *dst,
     zprintf(24, "dst=%dx%d (%lx) %lx src=%dx%d %lx\n",
             dst->width, dst->height, n, dst->datalen,
             src->width, src->height, src->datalen);
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!(dst->data)) return;
     convert_y_resize(dst, dstfmt, src, srcfmt, n);
     memset((uint8_t*)(dst->data) + n, 0x80, dst->datalen - n);
@@ -384,7 +384,7 @@ static void convert_yuv_pack (zbar_image_t *dst,
 {
     uv_roundup(dst, dstfmt);
     dst->datalen = dst->width * dst->height + uvp_size(dst, dstfmt) * 2;
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!dst->data) return;
     uint8_t *dstp = (void*)dst->data;
 
@@ -452,7 +452,7 @@ static void convert_yuv_unpack (zbar_image_t *dst,
     unsigned long dstn = dst->width * dst->height;
     unsigned long dstm2 = uvp_size(dst, dstfmt) * 2;
     dst->datalen = dstn + dstm2;
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!(dst->data)) return;
     if(dstm2)
         memset((uint8_t*)dst->data + dstn, 0x80, dstm2);
@@ -495,7 +495,7 @@ static void convert_uvp_resample (zbar_image_t *dst,
     unsigned long dstn = dst->width * dst->height;
     unsigned long dstm2 = uvp_size(dst, dstfmt) * 2;
     dst->datalen = dstn + dstm2;
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!(dst->data)) return;
     convert_y_resize(dst, dstfmt, src, srcfmt, dstn);
     if(dstm2)
@@ -511,7 +511,7 @@ static void convert_uv_resample (zbar_image_t *dst,
     uv_roundup(dst, dstfmt);
     unsigned long dstn = dst->width * dst->height;
     dst->datalen = dstn + uvp_size(dst, dstfmt) * 2;
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!dst->data) return;
     uint8_t *dstp = (void*)dst->data;
 
@@ -561,7 +561,7 @@ static void convert_yuvp_to_rgb (zbar_image_t *dst,
                                  const zbar_format_def_t *srcfmt)
 {
     dst->datalen = dst->width * dst->height * dstfmt->p.rgb.bpp;
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!dst->data) return;
     uint8_t *dstp = (void*)dst->data;
 
@@ -610,7 +610,7 @@ static void convert_rgb_to_yuvp (zbar_image_t *dst,
     unsigned long dstn = dst->width * dst->height;
     unsigned long dstm2 = uvp_size(dst, dstfmt) * 2;
     dst->datalen = dstn + dstm2;
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!dst->data) return;
     if(dstm2)
         memset((uint8_t*)dst->data + dstn, 0x80, dstm2);
@@ -661,7 +661,7 @@ static void convert_yuv_to_rgb (zbar_image_t *dst,
 {
     unsigned long dstn = dst->width * dst->height;
     dst->datalen = dstn * dstfmt->p.rgb.bpp;
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!dst->data) return;
     uint8_t *dstp = (void*)dst->data;
 
@@ -719,7 +719,7 @@ static void convert_rgb_to_yuv (zbar_image_t *dst,
 {
     uv_roundup(dst, dstfmt);
     dst->datalen = dst->width * dst->height + uvp_size(dst, dstfmt) * 2;
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!dst->data) return;
     uint8_t *dstp = (void*)dst->data;
     uint8_t flags = dstfmt->p.yuv.packorder & 2;
@@ -774,7 +774,7 @@ static void convert_rgb_resample (zbar_image_t *dst,
 {
     unsigned long dstn = dst->width * dst->height;
     dst->datalen = dstn * dstfmt->p.rgb.bpp;
-    dst->data = malloc(dst->datalen);
+    dst->data = __malloc(dst->datalen);
     if(!dst->data) return;
     uint8_t *dstp = (void*)dst->data;
 

@@ -22,7 +22,7 @@
  *------------------------------------------------------------------------*/
 
 #include <config.h>
-#include <stdlib.h>     /* malloc, calloc, free */
+#include <stdlib.h>     /* __malloc, __calloc, free */
 #include <stdio.h>      /* snprintf */
 #include <string.h>     /* memset, strlen */
 
@@ -32,9 +32,9 @@
 
 zbar_decoder_t *zbar_decoder_create ()
 {
-    zbar_decoder_t *dcode = calloc(1, sizeof(zbar_decoder_t));
+    zbar_decoder_t *dcode = __calloc(1, sizeof(zbar_decoder_t));
     dcode->buf_alloc = BUFFER_MIN;
-    dcode->buf = malloc(dcode->buf_alloc);
+    dcode->buf = __malloc(dcode->buf_alloc);
 
     /* initialize default configs */
 #ifdef ENABLE_EAN
@@ -73,8 +73,8 @@ zbar_decoder_t *zbar_decoder_create ()
 void zbar_decoder_destroy (zbar_decoder_t *dcode)
 {
     if(dcode->buf)
-        free(dcode->buf);
-    free(dcode);
+        __free(dcode->buf);
+    __free(dcode);
 }
 
 void zbar_decoder_reset (zbar_decoder_t *dcode)
@@ -380,8 +380,8 @@ const char *_zbar_decoder_buf_dump (unsigned char *buf,
     int dumplen = (buflen * 3) + 12;
     if(!decoder_dump || dumplen > decoder_dumplen) {
         if(decoder_dump)
-            free(decoder_dump);
-        decoder_dump = malloc(dumplen);
+            __free(decoder_dump);
+        decoder_dump = __malloc(dumplen);
         decoder_dumplen = dumplen;
     }
     char *p = decoder_dump +

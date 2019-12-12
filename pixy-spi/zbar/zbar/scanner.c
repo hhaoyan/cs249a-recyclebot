@@ -22,7 +22,7 @@
  *------------------------------------------------------------------------*/
 
 #include <config.h>
-#include <stdlib.h>     /* malloc, free, abs */
+#include <stdlib.h>     /* __malloc, free, abs */
 #include <string.h>     /* memset */
 
 #include <zbar.h>
@@ -55,7 +55,7 @@
 
 zbar_scanner_t *zbar_scanner_create (zbar_decoder_t *dcode)
 {
-    zbar_scanner_t *scn = malloc(sizeof(zbar_scanner_t));
+    zbar_scanner_t *scn = __malloc(sizeof(zbar_scanner_t));
     scn->decoder = dcode;
     scn->y1_min_thresh = ZBAR_SCANNER_THRESH_MIN;
     zbar_scanner_reset(scn);
@@ -64,7 +64,7 @@ zbar_scanner_t *zbar_scanner_create (zbar_decoder_t *dcode)
 
 void zbar_scanner_destroy (zbar_scanner_t *scn)
 {
-    free(scn);
+    __free(scn);
 }
 
 zbar_symbol_type_t zbar_scanner_reset (zbar_scanner_t *scn)

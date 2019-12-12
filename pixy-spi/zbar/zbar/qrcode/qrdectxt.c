@@ -40,8 +40,7 @@ int qr_code_data_list_extract_text(const qr_code_data_list *_qrlist,
   int                  i;
   qrdata=_qrlist->qrdata;
   nqrdata=_qrlist->nqrdata;
-  text=(char **)malloc(nqrdata*sizeof(*text));
-  mark=(unsigned char *)calloc(nqrdata,sizeof(*mark));
+  mark=(unsigned char *)__calloc(nqrdata,sizeof(*mark));
   ntext=0;
   for(i=0;i<nqrdata;i++)if(!mark[i]){
     const qr_code_data       *qrdataj;
@@ -106,7 +105,7 @@ int qr_code_data_list_extract_text(const qr_code_data_list *_qrlist,
     }
 
     /*Step 2: Convert the entries.*/
-    sa_text=(char *)malloc((sa_ctext+1)*sizeof(*sa_text));
+    sa_text=(char *)__malloc((sa_ctext+1)*sizeof(*sa_text));
     sa_ntext=0;
     err=0;
     zbar_symbol_t *syms = NULL, **sym = &syms;
@@ -170,7 +169,7 @@ int qr_code_data_list_extract_text(const qr_code_data_list *_qrlist,
     if(!err){
       sa_text[sa_ntext++]='\0';
       if(sa_ctext+1>sa_ntext){
-        sa_text=(char *)realloc(sa_text,sa_ntext*sizeof(*sa_text));
+        sa_text=(char *)__realloc(sa_text,sa_ntext*sizeof(*sa_text));
       }
 
       zbar_symbol_t *sa_sym;
@@ -220,9 +219,9 @@ int qr_code_data_list_extract_text(const qr_code_data_list *_qrlist,
     }
     else {
         _zbar_image_scanner_recycle_syms(iscn, syms);
-        free(sa_text);
+        __free(sa_text);
     }
   }
-  free(mark);
+  __free(mark);
   return ntext;
 }

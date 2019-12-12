@@ -23,6 +23,31 @@
 #ifndef _ZBAR_H_
 #define _ZBAR_H_
 
+#define DEBUG_MALLOC
+
+#ifdef DEBUG_MALLOC
+
+#include <stdlib.h>
+void *debug_malloc(size_t size, const char* file, int line);
+void *debug_calloc(size_t count, size_t size, const char* file, int line);
+void *debug_realloc(void *ptr, size_t size, const char* file, int line);
+void debug_free(void *p, const char* file, int line);
+void debug_mem_finalize();
+
+#define __malloc(s) debug_malloc(s, __FILE__, __LINE__)
+#define __calloc(c, s) debug_calloc(c, s, __FILE__, __LINE__)
+#define __realloc(p, s) debug_realloc(p, s, __FILE__, __LINE__)
+#define __free(p) debug_free(p, __FILE__, __LINE__)
+
+#else
+
+#define __malloc(s) malloc(s)
+#define __calloc(c, s) calloc(c, s)
+#define __realloc(p, s) realloc(p, s)
+#define __free(p) free(p)
+
+#endif
+
 /** @file
  * ZBar Barcode Reader C API definition
  */
