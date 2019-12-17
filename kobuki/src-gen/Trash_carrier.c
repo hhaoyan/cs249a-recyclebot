@@ -90,7 +90,7 @@ void trash_carrier_init(Trash_carrier* handle)
 	handle->iface.error = 0;
 	handle->iface.last_error = 0;
 	handle->iface.turn_speed = 0;
-	handle->iface.base_speed = 400;
+	handle->iface.base_speed = 300;
 	handle->iface.speed_left = 0;
 	handle->iface.speed_right = 0;
 	handle->iface.trash_picked = bool_false;
